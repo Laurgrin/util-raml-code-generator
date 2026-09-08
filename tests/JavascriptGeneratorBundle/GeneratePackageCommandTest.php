@@ -113,12 +113,12 @@ class GeneratePackageCommandTest extends KernelTestCase
             'scalar property' => [
                 'nullable-types',
                 'NullableTypesClient',
-                'Did not found defined type "boolean | nil"',
+                'Property "enabled" of type "boolean" is nullable, which the JavaScript generator cannot express',
             ],
             'named reference property' => [
                 'nullable-reference',
                 'NullableReferenceClient',
-                'Did not found defined type "Owner | nil"',
+                'Property "owner" of type "Owner" is nullable, which the JavaScript generator cannot express',
             ],
         ];
     }

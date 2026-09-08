@@ -14,7 +14,7 @@ use Raml\Types\NullType;
 class PropertyDefinitionBuilder
 {
     private const UNION_SEPARATOR = '|';
-    private const MAX_UNION_MEMBERS = 2;
+    private const NULLABLE_UNION_MEMBERS = 2;
     private const NULLABLE_SHORTHAND_SUFFIX = '?';
 
     private $constantBuilder;
@@ -46,7 +46,6 @@ class PropertyDefinitionBuilder
             ->setDescription(isset($definition['description']) ? $definition['description'] : null)
             ->setRequired(isset($definition['required']) ? $definition['required'] : false)
             ->setNullable($nullable)
-            ->setRamlDeclaration($declaredType)
         ;
 
         if ($resolvedType !== null && strpos($resolvedType, '[]') !== false) {
@@ -76,7 +75,7 @@ class PropertyDefinitionBuilder
         return $property;
     }
 
-    private function unwrapNullableType(string $type)
+    private function unwrapNullableType(string $type) : ?string
     {
         $shorthand = $this->unwrapNullableShorthand($type);
         if ($shorthand !== null) {
@@ -87,8 +86,11 @@ class PropertyDefinitionBuilder
             return null;
         }
 
-        $members = array_map('trim', explode(self::UNION_SEPARATOR, $type, self::MAX_UNION_MEMBERS + 1));
-        if (count($members) !== self::MAX_UNION_MEMBERS) {
+        $members = array_map(
+            'trim',
+            explode(self::UNION_SEPARATOR, $type, self::NULLABLE_UNION_MEMBERS + 1)
+        );
+        if (count($members) !== self::NULLABLE_UNION_MEMBERS || in_array('', $members, true)) {
             return null;
         }
 
@@ -100,7 +102,7 @@ class PropertyDefinitionBuilder
         return $members[$nilPositions[0] === 0 ? 1 : 0];
     }
 
-    private function unwrapNullableShorthand(string $type)
+    private function unwrapNullableShorthand(string $type) : ?string
     {
         if (substr($type, -1) !== self::NULLABLE_SHORTHAND_SUFFIX) {
             return null;
@@ -123,17 +125,22 @@ class PropertyDefinitionBuilder
         }
 
         if ($type === PropertyDefinition::TYPE_ARRAY) {
-            return isset($definition['items']['type']);
+            return $this->hasArrayItems($definition);
         }
 
         return true;
     }
 
-    private function getPropertyDefinition($type, array $definition)
+    private function hasArrayItems(array $definition) : bool
+    {
+        return isset($definition['items']['type']);
+    }
+
+    private function getPropertyDefinition(?string $type, array $definition) : PropertyDefinition
     {
         $property = new PropertyDefinition();
 
-        if ($type === PropertyDefinition::TYPE_ARRAY) {
+        if ($type === PropertyDefinition::TYPE_ARRAY && $this->hasArrayItems($definition)) {
             $property = new ArrayPropertyDefinition();
             $property
                 ->setItemsType($definition['items']['type'])
