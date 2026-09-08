@@ -202,10 +202,12 @@ properties:
 ```
 
 The generated PHP accessor admits `null` (`boolean|null`) while the key stays mandatory. Scalars,
-the `datetime` family and references to named types are supported by both PHP generators. An
-`array` property declared with an `items` node is nullable in the REST client only; in the Symfony
-bundle an array property remains a collection initialised to `[]`. The JavaScript generator does
-not support nullable types and rejects a contract that declares one.
+the `datetime` family, `object`, `file` and references to named types are supported by both PHP
+generators. An `array` whose `items` are a scalar type is nullable in the REST client only; in the
+Symfony bundle an array property remains a collection initialised to `[]`. An `array` of a named
+type cannot be nullable — the generated getter has no way to distinguish null from empty — and such
+a declaration is rejected. The JavaScript generator does not support nullable types and rejects a
+contract that declares one.
 
 Three spellings are equivalent, matching the RAML specification:
 
@@ -215,9 +217,10 @@ type: boolean | null
 type: boolean?
 ```
 
-Nullability applies to the read side. Getters return `null`, and normalizers and Doctrine columns
-generated for the Symfony bundle treat the value as nullable. Generated setters still require a
-non-null argument, so a `null` value cannot be sent back through the generated client.
+Nullability applies mainly to the read side. Getters return `null`, and normalizers and Doctrine
+columns generated for the Symfony bundle treat the value as nullable. Generated setters still
+require a non-null argument for every type except `file`, whose setter accepts `null` and forwards
+it, so for the others a `null` value cannot be sent back through the generated client.
 
 Unions of any other shape — `string | integer`, three or more members, a malformed union such as
 `string |`, or a union whose non-null member cannot be expressed on its own such as `array | nil`
