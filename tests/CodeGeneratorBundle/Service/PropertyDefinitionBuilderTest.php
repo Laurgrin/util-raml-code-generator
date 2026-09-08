@@ -115,6 +115,18 @@ class PropertyDefinitionBuilderTest extends TestCase
                 '| string',
                 false,
             ],
+            'a falsy member is not a nil declaration' => [
+                'string | 0',
+                PropertyDefinition::TYPE_REFERENCE,
+                'string | 0',
+                false,
+            ],
+            'a falsy member is not a nil declaration in either position' => [
+                '0 | string',
+                PropertyDefinition::TYPE_REFERENCE,
+                '0 | string',
+                false,
+            ],
             'bare nil is not a union' => [
                 'nil',
                 PropertyDefinition::TYPE_REFERENCE,
@@ -178,7 +190,7 @@ class PropertyDefinitionBuilderTest extends TestCase
         ];
     }
 
-    public function testNullableArrayWithItemsIsUnwrapped()
+    public function testNullableArrayWithScalarItemsIsUnwrapped()
     {
         $property = $this->builder->buildPropertyDefinition(
             'tags',
@@ -187,6 +199,18 @@ class PropertyDefinitionBuilderTest extends TestCase
 
         $this->assertSame(PropertyDefinition::TYPE_ARRAY, $property->getType());
         $this->assertTrue($property->isNullable());
+    }
+
+    public function testNullableArrayOfReferencesIsLeftForTheValidatorToReject()
+    {
+        $property = $this->builder->buildPropertyDefinition(
+            'owners',
+            ['type' => 'array | nil', 'items' => ['type' => 'Owner'], 'required' => true]
+        );
+
+        $this->assertSame(PropertyDefinition::TYPE_REFERENCE, $property->getType());
+        $this->assertSame('array | nil', $property->getReference());
+        $this->assertFalse($property->isNullable());
     }
 
     public function testNullableDateTimeKeepsItsOwnDefinitionType()
