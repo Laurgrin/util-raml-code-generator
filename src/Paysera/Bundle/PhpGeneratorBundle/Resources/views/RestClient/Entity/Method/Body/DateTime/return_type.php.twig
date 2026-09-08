@@ -1,4 +1,4 @@
-{% if property.allowsNullValue == false %}
+{% if property.required %}
 \DateTimeImmutable
 {% else %}
 \DateTimeImmutable|null

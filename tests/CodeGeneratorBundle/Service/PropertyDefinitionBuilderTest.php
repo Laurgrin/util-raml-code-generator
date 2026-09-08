@@ -37,7 +37,7 @@ class PropertyDefinitionBuilderTest extends TestCase
 
         $this->assertSame($expectedType, $property->getType());
         $this->assertSame($expectedReference, $property->getReference());
-        $this->assertSame($expectedNullable, $property->allowsNullValue());
+        $this->assertSame($expectedNullable, $property->isNullable());
     }
 
     public function dataProviderTestNullableDeclaration()
@@ -120,29 +120,30 @@ class PropertyDefinitionBuilderTest extends TestCase
         );
 
         $this->assertInstanceOf(DateTimePropertyDefinition::class, $property);
-        $this->assertTrue($property->allowsNullValue());
+        $this->assertTrue($property->isNullable());
+        $this->assertFalse($property->isRequired());
     }
 
     /**
-     * @dataProvider dataProviderTestAllowsNullValue
+     * @dataProvider dataProviderTestNullableTypeIsNeverRequired
      */
-    public function testAllowsNullValue(string $declaredType, bool $required, bool $expected)
+    public function testNullableTypeIsNeverRequired(string $declaredType, bool $required, bool $expected)
     {
         $property = $this->builder->buildPropertyDefinition(
             'value',
             ['type' => $declaredType, 'required' => $required]
         );
 
-        $this->assertSame($expected, $property->allowsNullValue());
+        $this->assertSame($expected, $property->isRequired());
     }
 
-    public function dataProviderTestAllowsNullValue()
+    public function dataProviderTestNullableTypeIsNeverRequired()
     {
         return [
-            'required and not nullable' => ['boolean', true, false],
-            'required and nullable' => ['boolean | nil', true, true],
-            'optional and not nullable' => ['boolean', false, true],
-            'optional and nullable' => ['boolean | nil', false, true],
+            'required and not nullable' => ['boolean', true, true],
+            'required and nullable' => ['boolean | nil', true, false],
+            'optional and not nullable' => ['boolean', false, false],
+            'optional and nullable' => ['boolean | nil', false, false],
         ];
     }
 }
