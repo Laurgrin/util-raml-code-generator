@@ -203,11 +203,12 @@ properties:
 
 The generated PHP accessor admits `null` (`boolean|null`) while the key stays mandatory. Scalars,
 the `datetime` family, `object`, `file` and references to named types are supported by both PHP
-generators. An `array` whose `items` are a scalar type is nullable in the REST client only; in the
-Symfony bundle an array property remains a collection initialised to `[]`. An `array` of a named
-type cannot be nullable — the generated getter has no way to distinguish null from empty — and such
-a declaration is rejected. The JavaScript generator does not support nullable types and rejects a
-contract that declares one.
+generators. An `array` is nullable only when its `items` are `integer`, `string` or `boolean`, and
+only in the REST client; in the Symfony bundle an array property remains a collection initialised
+to `[]`. Every other `items` type is rejected. For `datetime`, `file` and named types that is
+required for correctness, their generated getter mapping `null` to `[]`; for `number` it is
+conservative, the return-type template emitting `|null` only for the three types above. The
+JavaScript generator does not support nullable types and rejects a contract that declares one.
 
 Three spellings are equivalent, matching the RAML specification:
 
@@ -217,10 +218,15 @@ type: boolean | null
 type: boolean?
 ```
 
-Nullability applies mainly to the read side. Getters return `null`, and normalizers and Doctrine
-columns generated for the Symfony bundle treat the value as nullable. Generated setters still
-require a non-null argument for every type except `file`, whose setter accepts `null` and forwards
-it, so for the others a `null` value cannot be sent back through the generated client.
+Getters return `null`, and normalizers and Doctrine columns generated for the Symfony bundle treat
+the value as nullable.
+
+Setters are inconsistent about `null`, and the generator does not change that. A setter that
+carries a type declaration — `array`, `\DateTimeInterface`, or a named class — rejects `null` with
+a `TypeError`. A setter for a scalar or `object` property carries no type declaration and so
+accepts `null` and forwards it, even though its `@param` docblock names only the non-null type;
+the `file` setter forwards `null` explicitly. So a `null` value can be sent back for scalar,
+`object` and `file` properties, and cannot for the rest.
 
 Unions of any other shape — `string | integer`, three or more members, a malformed union such as
 `string |`, or a union whose non-null member cannot be expressed on its own such as `array | nil`
