@@ -67,6 +67,8 @@ $item->setScore($score);
 $item->setNickname($nickname);
 $item->setTags($tags);
 $item->setStatus($status);
+$item->setPayload($payload);
+$item->setAttachment($attachment);
     
 $result = $nullableTypesClient->updateItem($id, $item);
 ```

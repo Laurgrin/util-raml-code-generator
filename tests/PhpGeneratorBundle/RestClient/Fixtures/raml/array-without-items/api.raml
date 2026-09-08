@@ -1,0 +1,23 @@
+#%RAML 1.0
+title: Array Without Items
+version: "1.0"
+baseUri: https://example.com/array-without-items/rest/v1
+mediaType: application/json
+protocols: [ HTTPS ]
+
+types:
+  Container: !include types/container.raml
+
+/containers:
+  /{id}:
+    uriParameters:
+      id:
+        required: true
+        type: string
+    get:
+      description: Get a container
+      responses:
+        200:
+          body:
+            application/json:
+              type: Container

@@ -55,6 +55,12 @@ class ItemNormalizer implements NormalizerInterface, DenormalizerInterface
         if (isset($data['status'])) {
             $entity->setStatus($data['status']);
         }
+        if (isset($data['payload'])) {
+            $entity->setPayload($data['payload']);
+        }
+        if (isset($data['attachment'])) {
+            $entity->setAttachment($data['attachment']);
+        }
         
         return $entity;
     }
@@ -78,6 +84,8 @@ class ItemNormalizer implements NormalizerInterface, DenormalizerInterface
             'nickname' => $entity->getNickname(),
             'tags' => $entity->getTags(),
             'status' => $entity->getStatus(),
+            'payload' => $entity->getPayload(),
+            'attachment' => $entity->getAttachment(),
             
         ];
     }

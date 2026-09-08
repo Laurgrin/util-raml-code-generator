@@ -196,4 +196,43 @@ class Item extends Entity
         $this->set('status', $status);
         return $this;
     }
+    /**
+     * @return object|null
+     */
+    public function getPayload()
+    {
+return $this->getByReference('payload');
+    }
+    /**
+     * @param object $payload
+     * @return $this
+     */
+    public function setPayload($payload)
+    {
+        $this->setByReference('payload', $payload);
+        return $this;
+    }
+    /**
+     * @return string|null
+     */
+    public function getAttachment()
+    {
+        if ($this->get('attachment') === null) {
+            return null;
+        }
+        return base64_decode($this->get('attachment'));
+    }
+    /**
+     * @param string $attachment
+     * @return $this
+     */
+    public function setAttachment($attachment)
+    {
+        if ($attachment === null) {
+            $this->set('attachment', null);
+            return $this;
+        }
+        $this->set('attachment', base64_encode($attachment));
+        return $this;
+    }
 }

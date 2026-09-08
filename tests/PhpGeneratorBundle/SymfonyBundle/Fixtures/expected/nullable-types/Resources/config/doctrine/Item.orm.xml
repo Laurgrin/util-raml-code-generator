@@ -18,6 +18,8 @@
         <field name="nickname" column="nickname" nullable="true" type="string"/>
         <!--TODO: generated_code non-scalar property <field name="tags" column="tags" nullable="true" type="array"/>-->
         <field name="status" column="status" nullable="true" type="string"/>
+        <field name="payload" column="payload" nullable="true" type="object"/>
+        <field name="attachment" column="attachment" nullable="true" type="file"/>
         
     </entity>
 </doctrine-mapping>
