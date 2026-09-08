@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Tests\CodeGeneratorBundle\Service;
 
+use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\ArrayPropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\DateTimePropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\PropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Service\ConstantBuilder;
@@ -199,6 +200,14 @@ class PropertyDefinitionBuilderTest extends TestCase
 
         $this->assertSame(PropertyDefinition::TYPE_ARRAY, $property->getType());
         $this->assertTrue($property->isNullable());
+    }
+
+    public function testArrayWithoutItemsKeepsItsArrayDefinitionSoTheValidatorRejectsIt()
+    {
+        $property = $this->builder->buildPropertyDefinition('contents', ['type' => 'array']);
+
+        $this->assertInstanceOf(ArrayPropertyDefinition::class, $property);
+        $this->assertNull($property->getItemsType());
     }
 
     public function testNullableArrayOfReferencesIsLeftForTheValidatorToReject()

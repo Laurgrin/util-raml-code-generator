@@ -115,6 +115,11 @@ class GenerateRestClientCommandTest extends KernelTestCase
                 'Paysera\\Test\\UnknownNullableReferenceClient',
                 'Did not found defined type "Unknown"',
             ],
+            'array declaring no items type' => [
+                'array-without-items',
+                'Paysera\\Test\\ArrayWithoutItemsClient',
+                'Did not found defined type "NULL"',
+            ],
         ];
     }
 
