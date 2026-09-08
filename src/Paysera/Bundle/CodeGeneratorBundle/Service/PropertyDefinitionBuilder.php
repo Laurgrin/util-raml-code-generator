@@ -8,11 +8,14 @@ use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\DateTimePropertyDefinit
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\DateTimeTypeDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\FilePropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\PropertyDefinition;
+use Raml\ApiDefinition;
+use Raml\Types\NullType;
 
 class PropertyDefinitionBuilder
 {
-    private const RAML_TYPE_NIL = 'nil';
     private const UNION_SEPARATOR = '|';
+    private const MAX_UNION_MEMBERS = 2;
+    private const NULLABLE_SHORTHAND_SUFFIX = '?';
 
     private $constantBuilder;
 
@@ -23,26 +26,30 @@ class PropertyDefinitionBuilder
 
     public function buildPropertyDefinition(string $name, array $definition)
     {
+        $declaredType = isset($definition['type']) ? $definition['type'] : null;
+        $resolvedType = $declaredType;
         $nullable = false;
-        if (isset($definition['type'])) {
-            $unwrappedType = $this->unwrapNullableType($definition['type']);
-            if ($unwrappedType !== null) {
-                $definition['type'] = $unwrappedType;
+
+        if ($declaredType !== null) {
+            $unwrappedType = $this->unwrapNullableType($declaredType);
+            if ($unwrappedType !== null && $this->isExpressibleType($unwrappedType, $definition)) {
+                $resolvedType = $unwrappedType;
                 $nullable = true;
             }
         }
 
-        $property = $this->getPropertyDefinition($definition);
+        $property = $this->getPropertyDefinition($resolvedType, $definition);
 
         $property
             ->setName($name)
-            ->setType(isset($definition['type']) ? $definition['type'] : null)
+            ->setType($resolvedType)
             ->setDescription(isset($definition['description']) ? $definition['description'] : null)
             ->setRequired(isset($definition['required']) ? $definition['required'] : false)
             ->setNullable($nullable)
+            ->setRamlDeclaration($declaredType)
         ;
 
-        if (isset($definition['type']) && strpos($definition['type'], '[]') !== false) {
+        if ($resolvedType !== null && strpos($resolvedType, '[]') !== false) {
             $property->setType(PropertyDefinition::TYPE_ARRAY);
         }
 
@@ -56,13 +63,9 @@ class PropertyDefinitionBuilder
                 true
             )
         ) {
-            $reference = null;
-            if (isset($definition['type'])) {
-                $reference = $definition['type'];
-            }
             $property
                 ->setType(PropertyDefinition::TYPE_REFERENCE)
-                ->setReference($reference)
+                ->setReference($resolvedType)
             ;
         }
 
@@ -75,39 +78,71 @@ class PropertyDefinitionBuilder
 
     private function unwrapNullableType(string $type)
     {
+        $shorthand = $this->unwrapNullableShorthand($type);
+        if ($shorthand !== null) {
+            return $shorthand;
+        }
+
         if (strpos($type, self::UNION_SEPARATOR) === false) {
             return null;
         }
 
-        $members = array_map('trim', explode(self::UNION_SEPARATOR, $type));
-        if (count($members) !== 2) {
+        $members = array_map('trim', explode(self::UNION_SEPARATOR, $type, self::MAX_UNION_MEMBERS + 1));
+        if (count($members) !== self::MAX_UNION_MEMBERS) {
             return null;
         }
 
-        $nilPosition = array_search(self::RAML_TYPE_NIL, $members, true);
-        if ($nilPosition === false) {
+        $nilPositions = array_keys(array_filter($members, [$this, 'declaresNoValue']));
+        if (count($nilPositions) !== 1) {
             return null;
         }
 
-        $declaredType = $members[$nilPosition === 0 ? 1 : 0];
-
-        return $declaredType === self::RAML_TYPE_NIL || $declaredType === '' ? null : $declaredType;
+        return $members[$nilPositions[0] === 0 ? 1 : 0];
     }
 
-    private function getPropertyDefinition(array $definition)
+    private function unwrapNullableShorthand(string $type)
+    {
+        if (substr($type, -1) !== self::NULLABLE_SHORTHAND_SUFFIX) {
+            return null;
+        }
+
+        $declaredType = trim(substr($type, 0, -1));
+
+        return $declaredType === '' ? null : $declaredType;
+    }
+
+    private function declaresNoValue(string $member) : bool
+    {
+        return ApiDefinition::determineType($member, ['type' => $member]) instanceof NullType;
+    }
+
+    private function isExpressibleType(string $type, array $definition) : bool
+    {
+        if (strpos($type, '[]') !== false) {
+            return false;
+        }
+
+        if ($type === PropertyDefinition::TYPE_ARRAY) {
+            return isset($definition['items']['type']);
+        }
+
+        return true;
+    }
+
+    private function getPropertyDefinition($type, array $definition)
     {
         $property = new PropertyDefinition();
 
-        if (isset($definition['type']) && $definition['type'] === PropertyDefinition::TYPE_ARRAY) {
+        if ($type === PropertyDefinition::TYPE_ARRAY) {
             $property = new ArrayPropertyDefinition();
             $property
                 ->setItemsType($definition['items']['type'])
             ;
         } elseif (
-            isset($definition['type'])
-            && in_array($definition['type'], DateTimeTypeDefinition::$supportedTypes, true)
+            $type !== null
+            && in_array($type, DateTimeTypeDefinition::$supportedTypes, true)
             || (
-                isset($definition['type']) && $definition['type'] === PropertyDefinition::TYPE_INTEGER
+                $type === PropertyDefinition::TYPE_INTEGER
                 && array_key_exists(DateTimeTypeDefinition::ANNOTATION_TIMESTAMP, $definition)
             )
         ) {
@@ -115,7 +150,7 @@ class PropertyDefinitionBuilder
             if (isset($definition['format'])) {
                 $property->setFormat($definition['format']);
             }
-        } elseif ($definition['type'] === PropertyDefinition::TYPE_FILE) {
+        } elseif ($type === PropertyDefinition::TYPE_FILE) {
             $property = new FilePropertyDefinition();
         }
 

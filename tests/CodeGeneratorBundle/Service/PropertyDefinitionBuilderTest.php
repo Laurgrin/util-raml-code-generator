@@ -109,7 +109,73 @@ class PropertyDefinitionBuilderTest extends TestCase
                 'nil',
                 false,
             ],
+            'null is the same concept as nil' => [
+                'boolean | null',
+                PropertyDefinition::TYPE_BOOLEAN,
+                null,
+                true,
+            ],
+            'null before the declared type' => [
+                'null | Owner',
+                PropertyDefinition::TYPE_REFERENCE,
+                'Owner',
+                true,
+            ],
+            'nil unioned with null declares no type to fall back to' => [
+                'nil | null',
+                PropertyDefinition::TYPE_REFERENCE,
+                'nil | null',
+                false,
+            ],
+            'shorthand suffix marks a scalar nullable' => [
+                'boolean?',
+                PropertyDefinition::TYPE_BOOLEAN,
+                null,
+                true,
+            ],
+            'shorthand suffix marks a reference nullable' => [
+                'Owner?',
+                PropertyDefinition::TYPE_REFERENCE,
+                'Owner',
+                true,
+            ],
+            'a bare shorthand suffix declares no type' => [
+                '?',
+                PropertyDefinition::TYPE_REFERENCE,
+                '?',
+                false,
+            ],
+            'an array without items is left intact rather than unwrapped' => [
+                'array | nil',
+                PropertyDefinition::TYPE_REFERENCE,
+                'array | nil',
+                false,
+            ],
+            'an array shorthand is not unwrapped' => [
+                'string[] | nil',
+                PropertyDefinition::TYPE_ARRAY,
+                null,
+                false,
+            ],
+            'an undefined type unwraps and is left for the validator to reject' => [
+                'Unknown | nil',
+                PropertyDefinition::TYPE_REFERENCE,
+                'Unknown',
+                true,
+            ],
         ];
+    }
+
+    public function testNullableArrayWithItemsIsUnwrapped()
+    {
+        $property = $this->builder->buildPropertyDefinition(
+            'tags',
+            ['type' => 'array | nil', 'items' => ['type' => 'string'], 'required' => true]
+        );
+
+        $this->assertSame(PropertyDefinition::TYPE_ARRAY, $property->getType());
+        $this->assertTrue($property->isNullable());
+        $this->assertSame('array | nil', $property->getRamlDeclaration());
     }
 
     public function testNullableDateTimeKeepsItsOwnDefinitionType()
@@ -121,29 +187,49 @@ class PropertyDefinitionBuilderTest extends TestCase
 
         $this->assertInstanceOf(DateTimePropertyDefinition::class, $property);
         $this->assertTrue($property->isNullable());
-        $this->assertFalse($property->isRequired());
+        $this->assertTrue($property->isRequired());
+        $this->assertTrue($property->allowsNullValue());
     }
 
     /**
-     * @dataProvider dataProviderTestNullableTypeIsNeverRequired
+     * @dataProvider dataProviderTestPresenceAndNullabilityAreIndependent
      */
-    public function testNullableTypeIsNeverRequired(string $declaredType, bool $required, bool $expected)
-    {
+    public function testPresenceAndNullabilityAreIndependent(
+        string $declaredType,
+        bool $required,
+        bool $expectedRequired,
+        bool $expectedNullable,
+        bool $expectedAllowsNullValue
+    ) {
         $property = $this->builder->buildPropertyDefinition(
             'value',
             ['type' => $declaredType, 'required' => $required]
         );
 
-        $this->assertSame($expected, $property->isRequired());
+        $this->assertSame($expectedRequired, $property->isRequired());
+        $this->assertSame($expectedNullable, $property->isNullable());
+        $this->assertSame($expectedAllowsNullValue, $property->allowsNullValue());
     }
 
-    public function dataProviderTestNullableTypeIsNeverRequired()
+    public function dataProviderTestPresenceAndNullabilityAreIndependent()
     {
         return [
-            'required and not nullable' => ['boolean', true, true],
-            'required and nullable' => ['boolean | nil', true, false],
-            'optional and not nullable' => ['boolean', false, false],
-            'optional and nullable' => ['boolean | nil', false, false],
+            'required and not nullable' => ['boolean', true, true, false, false],
+            'required and nullable' => ['boolean | nil', true, true, true, true],
+            'optional and not nullable' => ['boolean', false, false, false, true],
+            'optional and nullable' => ['boolean | nil', false, false, true, true],
         ];
+    }
+
+    public function testRequiredFacetSurvivesUnwrapping()
+    {
+        $property = $this->builder->buildPropertyDefinition(
+            'owner',
+            ['type' => 'Owner | nil', 'required' => true]
+        );
+
+        $this->assertTrue($property->isRequired());
+        $this->assertSame('Owner', $property->getReference());
+        $this->assertSame('Owner | nil', $property->getRamlDeclaration());
     }
 }

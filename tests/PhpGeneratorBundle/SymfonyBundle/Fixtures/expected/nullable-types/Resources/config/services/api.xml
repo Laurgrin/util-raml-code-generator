@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="vendor_nullable_types_api.api.item"
+                 class="Paysera\Bundle\RestBundle\RestApi">
+            <tag name="paysera_rest.api" api_key="vendor_nullable_types_api.item"/>
+            <argument type="service" id="service_container"/>
+            <argument type="service" id="logger"/>
+                                            
+
+            <call method="addResponseMapper">
+                <argument>vendor_nullable_types_api.normalizer.item</argument>
+                <argument>vendor_nullable_types_api.controller.item_api:getItem</argument>
+            </call>
+                        
+
+            <call method="addRequestMapper">
+                <argument>vendor_nullable_types_api.normalizer.item</argument>
+                <argument>vendor_nullable_types_api.controller.item_api:updateItem</argument>
+                <argument>item</argument>
+            </call>
+            <call method="addResponseMapper">
+                <argument>vendor_nullable_types_api.normalizer.item</argument>
+                <argument>vendor_nullable_types_api.controller.item_api:updateItem</argument>
+            </call>
+            
+        </service>
+        
+    </services>
+</container>

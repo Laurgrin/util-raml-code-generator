@@ -6,6 +6,9 @@ use Paysera\Component\RestClientCommon\Entity\Entity;
 
 class Item extends Entity
 {
+    const STATUS_ACTIVE = 'active';
+    const STATUS_SUSPENDED = 'suspended';
+
     public function __construct(array $data = [])
     {
         parent::__construct($data);
@@ -111,6 +114,86 @@ class Item extends Entity
     public function setOwner(Owner $owner)
     {
         $this->setByReference('owner', $owner->getDataByReference());
+        return $this;
+    }
+    /**
+     * @return boolean|null
+     */
+    public function isArchived()
+    {
+        return $this->get('archived');
+    }
+    /**
+     * @param boolean $archived
+     * @return $this
+     */
+    public function setArchived($archived)
+    {
+        $this->set('archived', $archived);
+        return $this;
+    }
+    /**
+     * @return integer|null
+     */
+    public function getScore()
+    {
+        return $this->get('score');
+    }
+    /**
+     * @param integer $score
+     * @return $this
+     */
+    public function setScore($score)
+    {
+        $this->set('score', $score);
+        return $this;
+    }
+    /**
+     * @return string|null
+     */
+    public function getNickname()
+    {
+        return $this->get('nickname');
+    }
+    /**
+     * @param string $nickname
+     * @return $this
+     */
+    public function setNickname($nickname)
+    {
+        $this->set('nickname', $nickname);
+        return $this;
+    }
+    /**
+     * @return string[]|null
+     */
+    public function getTags()
+    {
+        return $this->get('tags');
+    }
+    /**
+     * @param string[] $tags
+     * @return $this
+     */
+    public function setTags(array $tags)
+    {
+        $this->set('tags', $tags);
+        return $this;
+    }
+    /**
+     * @return string|null
+     */
+    public function getStatus()
+    {
+        return $this->get('status');
+    }
+    /**
+     * @param string $status
+     * @return $this
+     */
+    public function setStatus($status)
+    {
+        $this->set('status', $status);
         return $this;
     }
 }

@@ -31,10 +31,7 @@ class FieldDefinitionExtension extends Twig_Extension
 
     public function resolveDateTypeFormat(DateTimePropertyDefinition $definition)
     {
-        $type = $definition->getType();
-        if ($type === PropertyDefinition::TYPE_REFERENCE) {
-            $type = $definition->getReference();
-        }
+        $type = $definition->getDeclaredType();
 
         switch ($type) {
             case PropertyDefinition::TYPE_INTEGER:
