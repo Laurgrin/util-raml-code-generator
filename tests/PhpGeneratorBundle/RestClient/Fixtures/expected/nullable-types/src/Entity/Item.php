@@ -201,7 +201,7 @@ class Item extends Entity
      */
     public function getPayload()
     {
-return $this->getByReference('payload');
+        return $this->getByReference('payload');
     }
     /**
      * @param object $payload
