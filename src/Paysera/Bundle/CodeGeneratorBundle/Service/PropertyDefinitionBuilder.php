@@ -115,7 +115,8 @@ class PropertyDefinitionBuilder
 
     private function declaresNoValue(string $member) : bool
     {
-        return ApiDefinition::determineType($member, ['type' => $member]) instanceof NullType;
+        return (bool) $member
+            && ApiDefinition::determineType($member, ['type' => $member]) instanceof NullType;
     }
 
     private function isExpressibleType(string $type, array $definition) : bool
@@ -140,11 +141,11 @@ class PropertyDefinitionBuilder
     {
         $property = new PropertyDefinition();
 
-        if ($type === PropertyDefinition::TYPE_ARRAY && $this->hasArrayItems($definition)) {
+        if ($type === PropertyDefinition::TYPE_ARRAY) {
             $property = new ArrayPropertyDefinition();
-            $property
-                ->setItemsType($definition['items']['type'])
-            ;
+            if ($this->hasArrayItems($definition)) {
+                $property->setItemsType($definition['items']['type']);
+            }
         } elseif (
             $type !== null
             && in_array($type, DateTimeTypeDefinition::$supportedTypes, true)

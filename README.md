@@ -202,9 +202,10 @@ properties:
 ```
 
 The generated PHP accessor admits `null` (`boolean|null`) while the key stays mandatory. Scalars,
-the `datetime` family, arrays declared with an `items` node, and references to named types are all
-supported. The JavaScript generator does not support nullable types and rejects a contract that
-declares one.
+the `datetime` family and references to named types are supported by both PHP generators. An
+`array` property declared with an `items` node is nullable in the REST client only; in the Symfony
+bundle an array property remains a collection initialised to `[]`. The JavaScript generator does
+not support nullable types and rejects a contract that declares one.
 
 Three spellings are equivalent, matching the RAML specification:
 
