@@ -85,9 +85,11 @@ class EntityGenerator implements GeneratorInterface
                 continue;
             }
 
-            throw new UnrecognizedTypeException(
-                sprintf('Did not found defined type "%s"', $property->getRamlDeclaration())
-            );
+            throw new UnrecognizedTypeException(sprintf(
+                'Property "%s" of type "%s" is nullable, which the JavaScript generator cannot express',
+                $property->getName(),
+                $property->getDeclaredType()
+            ));
         }
     }
 

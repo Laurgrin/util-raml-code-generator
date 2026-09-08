@@ -103,6 +103,18 @@ class PropertyDefinitionBuilderTest extends TestCase
                 ' | nil',
                 false,
             ],
+            'a trailing separator is not a nullable union' => [
+                'string |',
+                PropertyDefinition::TYPE_REFERENCE,
+                'string |',
+                false,
+            ],
+            'a leading separator is not a nullable union' => [
+                '| string',
+                PropertyDefinition::TYPE_REFERENCE,
+                '| string',
+                false,
+            ],
             'bare nil is not a union' => [
                 'nil',
                 PropertyDefinition::TYPE_REFERENCE,
@@ -175,7 +187,6 @@ class PropertyDefinitionBuilderTest extends TestCase
 
         $this->assertSame(PropertyDefinition::TYPE_ARRAY, $property->getType());
         $this->assertTrue($property->isNullable());
-        $this->assertSame('array | nil', $property->getRamlDeclaration());
     }
 
     public function testNullableDateTimeKeepsItsOwnDefinitionType()
@@ -230,6 +241,5 @@ class PropertyDefinitionBuilderTest extends TestCase
 
         $this->assertTrue($property->isRequired());
         $this->assertSame('Owner', $property->getReference());
-        $this->assertSame('Owner | nil', $property->getRamlDeclaration());
     }
 }

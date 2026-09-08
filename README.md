@@ -218,9 +218,13 @@ Nullability applies to the read side. Getters return `null`, and normalizers and
 generated for the Symfony bundle treat the value as nullable. Generated setters still require a
 non-null argument, so a `null` value cannot be sent back through the generated client.
 
-Unions of any other shape — `string | integer`, three or more members, or a union whose non-null
-member cannot be expressed on its own such as `array | nil` without an `items` node — are rejected
-with `Did not found defined type`.
+Unions of any other shape — `string | integer`, three or more members, a malformed union such as
+`string |`, or a union whose non-null member cannot be expressed on its own such as `array | nil`
+without an `items` node — are rejected with `Did not found defined type`.
+
+The array shorthand is not combinable with `nil`: `string[] | nil` is left as a plain array
+property and fails the same way a bare `type: string[]` already does, rather than being rejected
+with that message.
 
 
 ## Custom annotations
