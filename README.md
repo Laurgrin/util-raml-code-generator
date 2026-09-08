@@ -24,6 +24,7 @@ Currently this utility can:
     1. [types/category.raml](#raml/category/types/category.raml)
     1. [types/category-result.raml](#raml/category/types/category-result.raml)
     1. [traits/category-filter.raml](#raml/category/traits/category-filter.raml)
+    1. [Nullable types](#nullable-types)
 1. [Custom annotations](#custom-annotations)
     1. [`(generator_method_name_override)`](#--generator-method-name-override--)
 1. [Generate and publish clients](#generate-and-publish-clients)
@@ -184,6 +185,29 @@ properties:
     items:
       type: Category
 ```
+
+### Nullable types
+
+A property whose value may be `null` is declared as a union with `nil`. This is independent of
+`required`: `required` says whether the key must be present, `| nil` says whether its value may
+be empty.
+
+```yaml
+#%RAML 1.0 DataType
+properties:
+  enabled:
+    type: boolean | nil
+    required: true
+    description: Always sent, but null until a value has been chosen
+```
+
+The generated PHP accessor admits `null` (`boolean|null`) while the key stays mandatory. Scalars,
+the `datetime` family and references to named types are all supported. The JavaScript generator
+does not support nullable types and rejects a contract that declares one.
+
+Unions of any other shape — `string | integer`, or three or more members — cannot be represented
+by the generated clients and are rejected with `Did not found defined type`.
+
 
 ## Custom annotations
 

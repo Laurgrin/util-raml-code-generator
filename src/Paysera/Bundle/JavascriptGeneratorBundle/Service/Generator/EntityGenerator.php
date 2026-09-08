@@ -5,9 +5,11 @@ namespace Paysera\Bundle\JavascriptGeneratorBundle\Service\Generator;
 
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\ApiDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\FilterTypeDefinition;
+use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\PropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\ResultTypeDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\TypeDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\SourceCode;
+use Paysera\Bundle\CodeGeneratorBundle\Exception\UnrecognizedTypeException;
 use Paysera\Bundle\CodeGeneratorBundle\Service\Generator\GeneratorInterface;
 use Paysera\Bundle\CodeGeneratorBundle\Service\StringConverter;
 use Paysera\Bundle\CodeGeneratorBundle\Service\TypeConfigurationProvider;
@@ -38,6 +40,8 @@ class EntityGenerator implements GeneratorInterface
 
     public function generate(ApiDefinition $definition) : array
     {
+        $this->rejectNullableTypes($definition);
+
         $items = [];
         $usedTypes = $this->usedTypesResolver->resolveUsedTypes($definition);
         foreach ($usedTypes as $typName) {
@@ -73,6 +77,26 @@ class EntityGenerator implements GeneratorInterface
         }
 
         return $items;
+    }
+
+    private function rejectNullableTypes(ApiDefinition $definition)
+    {
+        foreach ($definition->getTypes() as $type) {
+            foreach ($type->getProperties() as $property) {
+                if (!$property->isNullable()) {
+                    continue;
+                }
+
+                $declaredType = $property->getType() === PropertyDefinition::TYPE_REFERENCE
+                    ? $property->getReference()
+                    : $property->getType()
+                ;
+
+                throw new UnrecognizedTypeException(
+                    sprintf('Did not found defined type "%s | nil"', $declaredType)
+                );
+            }
+        }
     }
 
     private function skipTypeGeneration(TypeDefinition $type)
