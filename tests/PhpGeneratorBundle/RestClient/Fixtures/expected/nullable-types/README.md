@@ -62,6 +62,11 @@ $item->setNote($note);
 $item->setEnabled($enabled);
 $item->setUpdatedAt($updatedAt);
 $item->setOwner($owner);
+$item->setArchived($archived);
+$item->setScore($score);
+$item->setNickname($nickname);
+$item->setTags($tags);
+$item->setStatus($status);
     
 $result = $nullableTypesClient->updateItem($id, $item);
 ```

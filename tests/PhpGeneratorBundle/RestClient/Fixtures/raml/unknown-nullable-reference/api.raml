@@ -1,0 +1,23 @@
+#%RAML 1.0
+title: Unsupported Union
+version: "1.0"
+baseUri: https://example.com/unknown-nullable-reference/rest/v1
+mediaType: application/json
+protocols: [ HTTPS ]
+
+types:
+  Reading: !include types/reading.raml
+
+/readings:
+  /{id}:
+    uriParameters:
+      id:
+        required: true
+        type: string
+    get:
+      description: Get a reading
+      responses:
+        200:
+          body:
+            application/json:
+              type: Reading

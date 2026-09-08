@@ -66,6 +66,11 @@ class PropertyDefinition
     private $nullable;
 
     /**
+     * @var string
+     */
+    private $ramlDeclaration;
+
+    /**
      * @var Constant[]
      */
     private $constants;
@@ -84,6 +89,7 @@ class PropertyDefinition
     {
         $this->required = false;
         $this->nullable = false;
+        $this->ramlDeclaration = null;
         $this->constants = [];
         $this->ramlPrimitiveTypesMap = [
             PropertyDefinition::TYPE_NUMBER => PropertyDefinition::TYPE_STRING,
@@ -175,7 +181,7 @@ class PropertyDefinition
      */
     public function isRequired()
     {
-        return $this->required && !$this->nullable;
+        return $this->required;
     }
 
     /**
@@ -205,6 +211,41 @@ class PropertyDefinition
     public function setNullable($nullable)
     {
         $this->nullable = $nullable;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function allowsNullValue()
+    {
+        return $this->nullable || !$this->required;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDeclaredType()
+    {
+        return $this->type === self::TYPE_REFERENCE ? $this->reference : $this->type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRamlDeclaration()
+    {
+        return $this->ramlDeclaration !== null ? $this->ramlDeclaration : $this->getDeclaredType();
+    }
+
+    /**
+     * @param string $ramlDeclaration
+     *
+     * @return $this
+     */
+    public function setRamlDeclaration($ramlDeclaration)
+    {
+        $this->ramlDeclaration = $ramlDeclaration;
         return $this;
     }
 

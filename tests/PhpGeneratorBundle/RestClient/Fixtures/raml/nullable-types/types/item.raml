@@ -1,5 +1,5 @@
 #%RAML 1.0 DataType
-description: Item exercising every nullable declaration the generator supports
+description: Item exercising the nullable declarations the REST client generator supports
 properties:
   id:
     type: string
@@ -19,3 +19,23 @@ properties:
   owner:
     type: Owner | nil
     required: true
+  archived:
+    type: boolean | null
+    required: true
+  score:
+    type: integer?
+    required: true
+  nickname:
+    type: string | nil
+    required: false
+  tags:
+    type: array | nil
+    required: true
+    items:
+      type: string
+  status:
+    type: string | nil
+    required: true
+    enum:
+      - active
+      - suspended

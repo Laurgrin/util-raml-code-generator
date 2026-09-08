@@ -77,16 +77,45 @@ class GenerateRestClientCommandTest extends KernelTestCase
         $this->ensureDirectoryTreeMatches($apiName);
     }
 
-    public function testGenerateCodeRejectsUnionThatIsNotNullable()
-    {
-        $this->expectException(UnrecognizedTypeException::class);
-        $this->expectExceptionMessage('Did not found defined type "string | integer"');
+    /**
+     * @dataProvider dataProviderTestGenerateCodeRejectsUnsupportedType
+     */
+    public function testGenerateCodeRejectsUnsupportedType(
+        string $apiName,
+        string $namespace,
+        string $expectedMessage
+    ) {
+        $this->removeTargetDir($apiName);
+        $generatedDir = sprintf('%s/Fixtures/generated/%s', __DIR__, $apiName);
 
-        $this->commandTester->execute([
-            'raml_file' => sprintf('%s/Fixtures/raml/unsupported-union/api.raml', __DIR__),
-            'output_dir' => sprintf('%s/Fixtures/generated/unsupported-union', __DIR__),
-            'namespace' => 'Paysera\\Test\\UnsupportedUnionClient',
-        ]);
+        try {
+            $this->commandTester->execute([
+                'raml_file' => sprintf('%s/Fixtures/raml/%s/api.raml', __DIR__, $apiName),
+                'output_dir' => $generatedDir,
+                'namespace' => $namespace,
+            ]);
+            $this->fail('Expected the unsupported type to be rejected');
+        } catch (UnrecognizedTypeException $exception) {
+            $this->assertSame($expectedMessage, $exception->getMessage());
+        }
+
+        $this->assertFileDoesNotExist($generatedDir);
+    }
+
+    public function dataProviderTestGenerateCodeRejectsUnsupportedType()
+    {
+        return [
+            'union that is not nullable' => [
+                'unsupported-union',
+                'Paysera\\Test\\UnsupportedUnionClient',
+                'Did not found defined type "string | integer"',
+            ],
+            'nullable union over an undeclared type' => [
+                'unknown-nullable-reference',
+                'Paysera\\Test\\UnknownNullableReferenceClient',
+                'Did not found defined type "Unknown"',
+            ],
+        ];
     }
 
     public function dataProviderTestGenerateCode()

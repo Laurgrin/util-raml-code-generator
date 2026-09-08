@@ -202,11 +202,25 @@ properties:
 ```
 
 The generated PHP accessor admits `null` (`boolean|null`) while the key stays mandatory. Scalars,
-the `datetime` family and references to named types are all supported. The JavaScript generator
-does not support nullable types and rejects a contract that declares one.
+the `datetime` family, arrays declared with an `items` node, and references to named types are all
+supported. The JavaScript generator does not support nullable types and rejects a contract that
+declares one.
 
-Unions of any other shape — `string | integer`, or three or more members — cannot be represented
-by the generated clients and are rejected with `Did not found defined type`.
+Three spellings are equivalent, matching the RAML specification:
+
+```yaml
+type: boolean | nil
+type: boolean | null
+type: boolean?
+```
+
+Nullability applies to the read side. Getters return `null`, and normalizers and Doctrine columns
+generated for the Symfony bundle treat the value as nullable. Generated setters still require a
+non-null argument, so a `null` value cannot be sent back through the generated client.
+
+Unions of any other shape — `string | integer`, three or more members, or a union whose non-null
+member cannot be expressed on its own such as `array | nil` without an `items` node — are rejected
+with `Did not found defined type`.
 
 
 ## Custom annotations
