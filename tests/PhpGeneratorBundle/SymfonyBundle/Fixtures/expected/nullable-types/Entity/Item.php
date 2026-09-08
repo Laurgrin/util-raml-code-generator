@@ -19,12 +19,11 @@ class Item
     private $tags;
     private $status;
     private $payload;
-    private $attachment;
 
     public function __construct()
     {
                                             
-        $this->tags = [];            
+        $this->tags = [];        
     }
 
     /**
@@ -208,22 +207,6 @@ class Item
     public function setPayload($payload)
     {
         $this->payload = $payload;
-        return $this;
-    }
-    /**
-     * @return file|null
-     */
-    public function getAttachment()
-    {
-        return $this->attachment;
-    }
-    /**
-     * @param file $attachment
-     * @return $this
-     */
-    public function setAttachment($attachment)
-    {
-        $this->attachment = $attachment;
         return $this;
     }
 
