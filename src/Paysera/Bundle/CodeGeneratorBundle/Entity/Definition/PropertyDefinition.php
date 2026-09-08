@@ -217,7 +217,7 @@ class PropertyDefinition
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getDeclaredType()
     {
