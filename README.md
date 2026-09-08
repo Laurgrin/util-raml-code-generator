@@ -203,12 +203,17 @@ properties:
 
 The generated PHP accessor admits `null` (`boolean|null`) while the key stays mandatory. Scalars,
 the `datetime` family, `object`, `file` and references to named types are supported by both PHP
-generators. An `array` is nullable only when its `items` are `integer`, `string` or `boolean`, and
-only in the REST client; in the Symfony bundle an array property remains a collection initialised
-to `[]`. Every other `items` type is rejected. For `datetime`, `file` and named types that is
-required for correctness, their generated getter mapping `null` to `[]`; for `number` it is
-conservative, the return-type template emitting `|null` only for the three types above. The
-JavaScript generator does not support nullable types and rejects a contract that declares one.
+generators. For `file` the Symfony bundle additionally emits `<field type="file"/>`, and Doctrine
+provides no such column type — the host application has to register a custom DBAL type under that
+name for the mapping to load. That is pre-existing and unrelated to nullability, but it is why the
+nullable-type fixtures exercise `file` in the REST client only.
+
+An `array` is nullable only when its `items` are `integer`, `string` or `boolean`, and only in the
+REST client; in the Symfony bundle an array property remains a collection initialised to `[]`.
+Every other `items` type is rejected. For `datetime`, `file` and named types that is required
+for correctness, their generated getter mapping `null` to `[]`; for `number` it is conservative,
+the return-type template emitting `|null` only for the three types above. The JavaScript generator
+does not support nullable types and rejects a contract that declares one.
 
 Three spellings are equivalent, matching the RAML specification:
 
