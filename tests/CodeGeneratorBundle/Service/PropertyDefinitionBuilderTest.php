@@ -39,6 +39,7 @@ class PropertyDefinitionBuilderTest extends TestCase
         $this->assertSame($expectedType, $property->getType());
         $this->assertSame($expectedReference, $property->getReference());
         $this->assertSame($expectedNullable, $property->isNullable());
+        $this->assertSame($declaredType, $property->getDeclaredType());
     }
 
     public function dataProviderTestNullableDeclaration()
