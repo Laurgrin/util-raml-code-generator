@@ -175,7 +175,7 @@ class PropertyDefinition
      */
     public function isRequired()
     {
-        return $this->required;
+        return $this->required && !$this->nullable;
     }
 
     /**
@@ -206,14 +206,6 @@ class PropertyDefinition
     {
         $this->nullable = $nullable;
         return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function allowsNullValue()
-    {
-        return $this->nullable || !$this->required;
     }
 
     /**
