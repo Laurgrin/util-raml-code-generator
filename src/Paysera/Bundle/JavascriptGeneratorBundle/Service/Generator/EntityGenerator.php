@@ -85,11 +85,7 @@ class EntityGenerator implements GeneratorInterface
                 continue;
             }
 
-            throw new UnrecognizedTypeException(sprintf(
-                'Property "%s" of type "%s" is nullable, which the JavaScript generator cannot express',
-                $property->getName(),
-                $property->getDeclaredType()
-            ));
+            throw UnrecognizedTypeException::forType($property->getDeclaredType());
         }
     }
 

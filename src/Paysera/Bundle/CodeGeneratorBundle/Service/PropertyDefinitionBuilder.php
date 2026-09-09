@@ -43,6 +43,7 @@ class PropertyDefinitionBuilder
         $property
             ->setName($name)
             ->setType($resolvedType)
+            ->setDeclaredType($declaredType)
             ->setDescription(isset($definition['description']) ? $definition['description'] : null)
             ->setRequired(isset($definition['required']) ? $definition['required'] : false)
             ->setNullable($nullable)

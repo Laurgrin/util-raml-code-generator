@@ -66,6 +66,11 @@ class PropertyDefinition
     private $nullable;
 
     /**
+     * @var string|null
+     */
+    private $declaredType;
+
+    /**
      * @var Constant[]
      */
     private $constants;
@@ -213,7 +218,18 @@ class PropertyDefinition
      */
     public function getDeclaredType()
     {
-        return $this->type === self::TYPE_REFERENCE ? $this->reference : $this->type;
+        return $this->declaredType;
+    }
+
+    /**
+     * @param string|null $declaredType
+     *
+     * @return $this
+     */
+    public function setDeclaredType($declaredType)
+    {
+        $this->declaredType = $declaredType;
+        return $this;
     }
 
     /**
