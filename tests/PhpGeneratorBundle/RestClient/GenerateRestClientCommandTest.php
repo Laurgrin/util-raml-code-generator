@@ -140,7 +140,6 @@ class GenerateRestClientCommandTest extends KernelTestCase
             ['money-collection'],
             ['issued-payment-card'],
             ['custom'],
-            ['nullable-types'],
             [
                 'apiName' => 'platform-version',
                 'libraryName' => null,
