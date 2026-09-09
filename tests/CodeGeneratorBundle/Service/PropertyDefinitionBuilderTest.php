@@ -231,48 +231,46 @@ class PropertyDefinitionBuilderTest extends TestCase
 
         $this->assertInstanceOf(DateTimePropertyDefinition::class, $property);
         $this->assertTrue($property->isNullable());
-        $this->assertTrue($property->isRequired());
-        $this->assertTrue($property->allowsNullValue());
+        $this->assertFalse($property->isRequired());
     }
 
     /**
-     * @dataProvider dataProviderTestPresenceAndNullabilityAreIndependent
+     * @dataProvider dataProviderTestRequiredMeansPresentAndNotNullable
      */
-    public function testPresenceAndNullabilityAreIndependent(
+    public function testRequiredMeansPresentAndNotNullable(
         string $declaredType,
         bool $required,
-        bool $expectedRequired,
         bool $expectedNullable,
-        bool $expectedAllowsNullValue
+        bool $expectedRequired
     ) {
         $property = $this->builder->buildPropertyDefinition(
             'value',
             ['type' => $declaredType, 'required' => $required]
         );
 
-        $this->assertSame($expectedRequired, $property->isRequired());
         $this->assertSame($expectedNullable, $property->isNullable());
-        $this->assertSame($expectedAllowsNullValue, $property->allowsNullValue());
+        $this->assertSame($expectedRequired, $property->isRequired());
     }
 
-    public function dataProviderTestPresenceAndNullabilityAreIndependent()
+    public function dataProviderTestRequiredMeansPresentAndNotNullable()
     {
         return [
-            'required and not nullable' => ['boolean', true, true, false, false],
-            'required and nullable' => ['boolean | nil', true, true, true, true],
-            'optional and not nullable' => ['boolean', false, false, false, true],
-            'optional and nullable' => ['boolean | nil', false, false, true, true],
+            'present and not nullable' => ['boolean', true, false, true],
+            'present but nullable' => ['boolean | nil', true, true, false],
+            'absent and not nullable' => ['boolean', false, false, false],
+            'absent and nullable' => ['boolean | nil', false, true, false],
         ];
     }
 
-    public function testRequiredFacetSurvivesUnwrapping()
+    public function testUnwrappingKeepsTheReferenceAndMarksItNullable()
     {
         $property = $this->builder->buildPropertyDefinition(
             'owner',
             ['type' => 'Owner | nil', 'required' => true]
         );
 
-        $this->assertTrue($property->isRequired());
         $this->assertSame('Owner', $property->getReference());
+        $this->assertTrue($property->isNullable());
+        $this->assertFalse($property->isRequired());
     }
 }

@@ -1,4 +1,4 @@
-{% if not property.allowsNullValue %}
+{% if property.required %}
 string
 {% else %}
 string|null
