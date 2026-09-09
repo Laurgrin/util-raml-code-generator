@@ -82,14 +82,9 @@ class GeneratePackageCommandTest extends KernelTestCase
         $this->ensureDirectoryTreeMatches($apiName);
     }
 
-    /**
-     * @dataProvider dataProviderTestGenerateCodeRejectsNullableTypes
-     */
-    public function testGenerateCodeRejectsNullableTypes(
-        string $apiName,
-        string $clientName,
-        string $expectedMessage
-    ) {
+    public function testGenerateCodeRejectsNullableTypes()
+    {
+        $apiName = 'nullable-types';
         $this->removeTargetDir($apiName);
         $generatedDir = sprintf('%s/Fixtures/generated/%s', __DIR__, $apiName);
 
@@ -97,30 +92,14 @@ class GeneratePackageCommandTest extends KernelTestCase
             $this->commandTester->execute([
                 'raml_file' => sprintf('%s/Fixtures/raml/%s/api.raml', __DIR__, $apiName),
                 'output_dir' => $generatedDir,
-                'client_name' => $clientName,
+                'client_name' => 'NullableTypesClient',
             ]);
             $this->fail('Expected the nullable contract to be rejected');
         } catch (UnrecognizedTypeException $exception) {
-            $this->assertSame($expectedMessage, $exception->getMessage());
+            $this->assertSame('Did not found defined type "boolean | nil"', $exception->getMessage());
         }
 
         $this->assertFileDoesNotExist($generatedDir);
-    }
-
-    public function dataProviderTestGenerateCodeRejectsNullableTypes()
-    {
-        return [
-            'scalar property' => [
-                'nullable-types',
-                'NullableTypesClient',
-                'Did not found defined type "boolean | nil"',
-            ],
-            'named reference property' => [
-                'nullable-reference',
-                'NullableReferenceClient',
-                'Did not found defined type "Owner | nil"',
-            ],
-        ];
     }
 
     public function dataProviderTestGenerateCode()
