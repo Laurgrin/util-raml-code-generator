@@ -1,21 +1,9 @@
 #%RAML 1.0 DataType
-description: Item with a nullable scalar, datetime and named reference
+description: Item with a nullable scalar
 properties:
   id:
     type: string
     required: true
-  label:
-    type: string
-    required: true
-  note:
-    type: string
-    required: false
   enabled:
     type: boolean | nil
-    required: true
-  updated_at:
-    type: datetime | nil
-    required: true
-  owner:
-    type: Owner | nil
     required: true
