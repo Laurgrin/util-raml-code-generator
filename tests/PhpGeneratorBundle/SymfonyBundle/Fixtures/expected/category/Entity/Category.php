@@ -6,16 +6,28 @@ class Category
 {
     const STATUS_ACTIVE = 'active';
     const STATUS_INACTIVE = 'inactive';
+    const STATE_ACTIVE = 'active';
+    const STATE_SUSPENDED = 'suspended';
 
     private $id;
     private $parentId;
     private $titles;
     private $status;
+    private $enabled;
+    private $updatedAt;
+    private $keyword;
+    private $archived;
+    private $score;
+    private $nickname;
+    private $tags;
+    private $state;
+    private $payload;
 
     public function __construct()
     {
                 
-        $this->titles = [];    
+        $this->titles = [];                                
+        $this->tags = [];        
     }
 
     /**
@@ -71,6 +83,150 @@ class Category
     public function setStatus($status)
     {
         $this->status = $status;
+        return $this;
+    }
+    /**
+     * @return boolean|null
+     */
+    public function isEnabled()
+    {
+        return $this->enabled;
+    }
+    /**
+     * @param boolean $enabled
+     * @return $this
+     */
+    public function setEnabled($enabled)
+    {
+        $this->enabled = $enabled;
+        return $this;
+    }
+    /**
+     * @return \DateTime|null
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+    /**
+     * @param \DateTimeInterface $updatedAt
+     * @return $this
+     */
+    public function setUpdatedAt(\DateTimeInterface $updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
+    /**
+     * @return Keyword|null
+     */
+    public function getKeyword()
+    {
+        return $this->keyword;
+    }
+    /**
+     * @param Keyword $keyword
+     * @return $this
+     */
+    public function setKeyword(Keyword $keyword)
+    {
+        $this->keyword = $keyword;
+        return $this;
+    }
+    /**
+     * @return boolean|null
+     */
+    public function isArchived()
+    {
+        return $this->archived;
+    }
+    /**
+     * @param boolean $archived
+     * @return $this
+     */
+    public function setArchived($archived)
+    {
+        $this->archived = $archived;
+        return $this;
+    }
+    /**
+     * @return integer|null
+     */
+    public function getScore()
+    {
+        return $this->score;
+    }
+    /**
+     * @param integer $score
+     * @return $this
+     */
+    public function setScore($score)
+    {
+        $this->score = $score;
+        return $this;
+    }
+    /**
+     * @return string|null
+     */
+    public function getNickname()
+    {
+        return $this->nickname;
+    }
+    /**
+     * @param string $nickname
+     * @return $this
+     */
+    public function setNickname($nickname)
+    {
+        $this->nickname = $nickname;
+        return $this;
+    }
+    /**
+     * @return string[]
+     */
+    public function getTags()
+    {
+        return $this->tags;
+    }
+    /**
+     * @param string[] $tags
+     * @return $this
+     */
+    public function setTags(array $tags)
+    {
+        $this->tags = $tags;
+        return $this;
+    }
+    /**
+     * @return string|null
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
+    /**
+     * @param string $state
+     * @return $this
+     */
+    public function setState($state)
+    {
+        $this->state = $state;
+        return $this;
+    }
+    /**
+     * @return object|null
+     */
+    public function getPayload()
+    {
+        return $this->payload;
+    }
+    /**
+     * @param object $payload
+     * @return $this
+     */
+    public function setPayload($payload)
+    {
+        $this->payload = $payload;
         return $this;
     }
 

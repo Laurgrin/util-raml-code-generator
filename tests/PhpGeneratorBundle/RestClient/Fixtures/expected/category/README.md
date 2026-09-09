@@ -106,6 +106,16 @@ $category->setAvatar($avatar);
 $category->setParentId($parentId);
 $category->setTitles($titles);
 $category->setStatus($status);
+$category->setEnabled($enabled);
+$category->setUpdatedAt($updatedAt);
+$category->setKeyword($keyword);
+$category->setArchived($archived);
+$category->setScore($score);
+$category->setNickname($nickname);
+$category->setTags($tags);
+$category->setState($state);
+$category->setPayload($payload);
+$category->setAttachment($attachment);
     
 $result = $categoryClient->createCategory($category);
 ```
