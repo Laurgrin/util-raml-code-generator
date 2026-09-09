@@ -85,7 +85,9 @@ class EntityGenerator implements GeneratorInterface
                 continue;
             }
 
-            throw UnrecognizedTypeException::forType($property->getDeclaredType());
+            throw new UnrecognizedTypeException(
+                sprintf('Did not found defined type "%s"', $property->getDeclaredType())
+            );
         }
     }
 
