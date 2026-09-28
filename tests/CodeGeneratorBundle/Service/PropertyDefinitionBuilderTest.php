@@ -269,6 +269,18 @@ class PropertyDefinitionBuilderTest extends TestCase
         $this->assertSame('active', $property->getConstants()[0]->getValue());
     }
 
+    public function testNullMemberOfUnsupportedNullableUnionIsLeftForTheValidatorToReject()
+    {
+        $property = $this->builder->buildPropertyDefinition(
+            'state',
+            ['type' => 'string | integer | nil', 'enum' => ['active', null], 'required' => true]
+        );
+
+        $this->assertSame(PropertyDefinition::TYPE_REFERENCE, $property->getType());
+        $this->assertSame('string | integer | nil', $property->getReference());
+        $this->assertCount(1, $property->getConstants());
+    }
+
     public function testNullMemberOfNonNullableEnumIsRejected()
     {
         $this->expectException(InvalidDefinitionException::class);

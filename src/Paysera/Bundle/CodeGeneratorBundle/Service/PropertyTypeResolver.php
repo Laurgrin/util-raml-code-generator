@@ -27,6 +27,21 @@ class PropertyTypeResolver
         return $this->resolveNullableType($definition) !== null;
     }
 
+    public function hasNullMember(array $definition) : bool
+    {
+        if (!isset($definition['type'])) {
+            return false;
+        }
+
+        if (substr($definition['type'], -1) === self::NULLABLE_SHORTHAND_SUFFIX) {
+            return true;
+        }
+
+        $members = array_map('trim', explode(self::UNION_SEPARATOR, $definition['type']));
+
+        return count(array_filter($members, [$this, 'isNullTypeName'])) > 0;
+    }
+
     public function isDateTime(array $definition) : bool
     {
         $type = $this->resolveType($definition);

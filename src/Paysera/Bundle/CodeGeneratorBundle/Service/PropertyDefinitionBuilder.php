@@ -57,20 +57,21 @@ class PropertyDefinitionBuilder
 
         if (isset($definition['enum'])) {
             $property->setConstants(
-                $this->constantBuilder->build($name, $this->getEnumConstantValues($property, $definition['enum']))
+                $this->constantBuilder->build($name, $this->getEnumConstantValues($property, $definition))
             );
         }
 
         return $property;
     }
 
-    private function getEnumConstantValues(PropertyDefinition $property, array $enum) : array
+    private function getEnumConstantValues(PropertyDefinition $property, array $definition) : array
     {
+        $enum = $definition['enum'];
         if (!in_array(null, $enum, true)) {
             return $enum;
         }
 
-        if (!$property->isNullable()) {
+        if (!$this->propertyTypeResolver->hasNullMember($definition)) {
             throw new InvalidDefinitionException(sprintf(
                 'Enum of property "%s" lists null, but its type "%s" is not nullable',
                 $property->getName(),
