@@ -109,7 +109,7 @@ class DefinitionValidator
             if (!is_string($type)) {
                 $type = gettype($type);
             }
-            throw new UnrecognizedTypeException(sprintf('Did not found defined type "%s"', $type));
+            throw UnrecognizedTypeException::undefinedType($type);
         }
     }
 }
