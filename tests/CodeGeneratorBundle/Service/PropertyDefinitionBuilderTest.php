@@ -213,6 +213,7 @@ class PropertyDefinitionBuilderTest extends TestCase
 
     /**
      * @dataProvider dataProviderTestArrayItemsType
+     * @param array|string $items
      */
     public function testArrayItemsType(string $declaredType, $items, bool $expectedNullable)
     {

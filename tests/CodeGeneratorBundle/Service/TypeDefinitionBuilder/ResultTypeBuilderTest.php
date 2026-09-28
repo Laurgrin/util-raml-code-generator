@@ -11,6 +11,7 @@ class ResultTypeBuilderTest extends TestCase
 {
     /**
      * @dataProvider dataProviderTestItemsType
+     * @param array|string $dataProperty
      */
     public function testItemsType($dataProperty, ?string $expectedItemsType)
     {

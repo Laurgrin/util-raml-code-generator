@@ -11,6 +11,7 @@ class DateTimeTypeBuilderTest extends TestCase
 {
     /**
      * @dataProvider dataProviderTestSupports
+     * @param array|string $field
      */
     public function testSupports($field, bool $expectedSupported)
     {
