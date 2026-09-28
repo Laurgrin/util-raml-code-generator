@@ -2,6 +2,7 @@
 
 namespace Vendor\Test\CategoryApiBundle\Normalizer;
 
+use Evp\Component\Money\MoneyNormalizer;
 use Paysera\Component\Serializer\Normalizer\DenormalizerInterface;
 use Paysera\Component\Serializer\Normalizer\NormalizerInterface;
 use Vendor\Test\CategoryApiBundle\Entity\Category;
@@ -9,11 +10,14 @@ use Vendor\Test\CategoryApiBundle\Entity\Category;
 class CategoryNormalizer implements NormalizerInterface, DenormalizerInterface
 {
     private $keywordNormalizer;
+    private $moneyNormalizer;
     
     public function __construct(
-        KeywordNormalizer $keywordNormalizer
+        KeywordNormalizer $keywordNormalizer,
+        MoneyNormalizer $moneyNormalizer
     ) {
         $this->keywordNormalizer = $keywordNormalizer;
+        $this->moneyNormalizer = $moneyNormalizer;
     }
     
     /**
@@ -61,6 +65,12 @@ class CategoryNormalizer implements NormalizerInterface, DenormalizerInterface
         if (isset($data['payload'])) {
             $entity->setPayload($data['payload']);
         }
+        if (isset($data['price'])) {
+            $entity->setPrice($this->moneyNormalizer->mapToEntity($data['price']));
+        }
+        if (isset($data['closed_at'])) {
+            $entity->setClosedAt((new \DateTime())->setTimestamp($data['closed_at']));
+        }
         
         return $entity;
     }
@@ -86,6 +96,8 @@ class CategoryNormalizer implements NormalizerInterface, DenormalizerInterface
             'tags' => $entity->getTags(),
             'state' => $entity->getState(),
             'payload' => $entity->getPayload(),
+            'price' => $entity->getPrice() !== null ? $this->moneyNormalizer->mapFromEntity($entity->getPrice()) : null,
+            'closed_at' => $entity->getClosedAt() !== null ? $entity->getClosedAt()->getTimestamp() : null,
             
         ];
     }

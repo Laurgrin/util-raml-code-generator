@@ -290,7 +290,7 @@ class PropertyDefinitionBuilderTest extends TestCase
         string $declaredType,
         bool $required,
         bool $expectedNullable,
-        bool $expectedAcceptsNull
+        bool $expectedCanBeNull
     ) {
         $property = $this->builder->buildPropertyDefinition(
             'value',
@@ -299,7 +299,7 @@ class PropertyDefinitionBuilderTest extends TestCase
 
         $this->assertSame($required, $property->isRequired());
         $this->assertSame($expectedNullable, $property->isNullable());
-        $this->assertSame($expectedAcceptsNull, $property->acceptsNull());
+        $this->assertSame($expectedCanBeNull, $property->canBeNull());
     }
 
     public function dataProviderTestRequiredIsPresenceAndNullabilityIsSeparate()

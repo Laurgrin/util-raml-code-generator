@@ -186,7 +186,7 @@ class PropertyDefinition
     /**
      * @return bool
      */
-    public function acceptsNull()
+    public function canBeNull()
     {
         return !$this->required || $this->nullable;
     }

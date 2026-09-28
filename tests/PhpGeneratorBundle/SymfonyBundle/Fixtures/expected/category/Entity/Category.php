@@ -2,6 +2,8 @@
 
 namespace Vendor\Test\CategoryApiBundle\Entity;
 
+use Evp\Component\Money\Money;
+
 class Category
 {
     const STATUS_ACTIVE = 'active';
@@ -22,12 +24,15 @@ class Category
     private $tags;
     private $state;
     private $payload;
+    private $priceAmount;
+    private $priceCurrency;
+    private $closedAt;
 
     public function __construct()
     {
                 
         $this->titles = [];                                
-        $this->tags = [];        
+        $this->tags = [];                
     }
 
     /**
@@ -227,6 +232,42 @@ class Category
     public function setPayload($payload)
     {
         $this->payload = $payload;
+        return $this;
+    }
+    /**
+     * @return Money|null
+     */
+    public function getPrice()
+    {
+        if ($this->priceAmount === null && $this->priceCurrency === null) {
+            return null;
+        }
+        return new Money($this->priceAmount, $this->priceCurrency);
+    }
+    /**
+     * @param Money $price
+     * @return $this
+     */
+    public function setPrice(Money $price)
+    {
+        $this->priceAmount = $price->getAmount();
+        $this->priceCurrency = $price->getCurrency();
+        return $this;
+    }
+    /**
+     * @return \DateTime|null
+     */
+    public function getClosedAt()
+    {
+        return $this->closedAt;
+    }
+    /**
+     * @param \DateTimeInterface $closedAt
+     * @return $this
+     */
+    public function setClosedAt(\DateTimeInterface $closedAt)
+    {
+        $this->closedAt = $closedAt;
         return $this;
     }
 

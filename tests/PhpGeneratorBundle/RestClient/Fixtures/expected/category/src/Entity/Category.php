@@ -2,6 +2,7 @@
 
 namespace Paysera\Test\CategoryClient\Entity;
 
+use Evp\Component\Money\Money;
 use Paysera\Component\RestClientCommon\Entity\Entity;
 
 class Category extends Entity
@@ -290,6 +291,44 @@ class Category extends Entity
             return $this;
         }
         $this->set('attachment', base64_encode($attachment));
+        return $this;
+    }
+    /**
+     * @return Money|null
+     */
+    public function getPrice()
+    {
+        if (!isset($this->get('price')['amount']) || !isset($this->get('price')['currency'])) {
+            return null;
+        }
+        return new Money($this->get('price')['amount'], $this->get('price')['currency']);
+    }
+    /**
+     * @param Money $price
+     * @return $this
+     */
+    public function setPrice(Money $price)
+    {
+        $this->set('price', ['amount' => $price->getAmount(), 'currency' => $price->getCurrency()]);
+        return $this;
+    }
+    /**
+     * @return \DateTimeImmutable|null
+     */
+    public function getClosedAt()
+    {
+        if ($this->get('closed_at') === null) {
+            return null;
+        }
+        return (new \DateTimeImmutable())->setTimestamp($this->get('closed_at'));
+    }
+    /**
+     * @param \DateTimeInterface $closedAt
+     * @return $this
+     */
+    public function setClosedAt(\DateTimeInterface $closedAt)
+    {
+        $this->set('closed_at', $closedAt->getTimestamp());
         return $this;
     }
 }

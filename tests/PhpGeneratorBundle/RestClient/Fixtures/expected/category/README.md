@@ -116,6 +116,8 @@ $category->setTags($tags);
 $category->setState($state);
 $category->setPayload($payload);
 $category->setAttachment($attachment);
+$category->setPrice($price);
+$category->setClosedAt($closedAt);
     
 $result = $categoryClient->createCategory($category);
 ```

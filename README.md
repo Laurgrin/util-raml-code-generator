@@ -205,8 +205,7 @@ The generated PHP accessor admits `null` (`boolean|null`) while the key stays ma
 the `datetime` family, `object`, `file` and references to named types are supported by both PHP
 generators. For `file` the Symfony bundle additionally emits `<field type="file"/>`, and Doctrine
 provides no such column type — the host application has to register a custom DBAL type under that
-name for the mapping to load. That is pre-existing and unrelated to nullability, but it is why the
-nullable-type fixtures exercise `file` in the REST client only.
+name for the mapping to load.
 
 An `array` is nullable only when its `items` are `integer`, `string` or `boolean`, declared either
 as `items: { type: string }` or with the shorthand `items: string`, and only in the REST client;
