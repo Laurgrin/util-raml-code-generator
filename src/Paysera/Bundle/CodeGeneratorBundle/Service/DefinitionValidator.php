@@ -26,6 +26,13 @@ class DefinitionValidator
                     $this->validateType($property->getReference(), $api);
                 }
                 if ($property instanceof ArrayPropertyDefinition) {
+                    if ($property->getItemsType() === null) {
+                        throw new UnrecognizedTypeException(sprintf(
+                            'Array property "%s" of type "%s" has no items type',
+                            $property->getName(),
+                            $type->getName()
+                        ));
+                    }
                     $this->validateType($property->getItemsType(), $api);
                 }
             }

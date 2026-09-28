@@ -8,6 +8,7 @@ use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\DateTimePropertyDefinit
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\PropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Service\ConstantBuilder;
 use Paysera\Bundle\CodeGeneratorBundle\Service\PropertyDefinitionBuilder;
+use Paysera\Bundle\CodeGeneratorBundle\Service\PropertyTypeResolver;
 use PHPUnit\Framework\TestCase;
 
 class PropertyDefinitionBuilderTest extends TestCase
@@ -19,7 +20,7 @@ class PropertyDefinitionBuilderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->builder = new PropertyDefinitionBuilder(new ConstantBuilder());
+        $this->builder = new PropertyDefinitionBuilder(new ConstantBuilder(), new PropertyTypeResolver());
     }
 
     /**
@@ -171,6 +172,24 @@ class PropertyDefinitionBuilderTest extends TestCase
                 '?',
                 false,
             ],
+            'shorthand suffix on nil declares no type to fall back to' => [
+                'nil?',
+                PropertyDefinition::TYPE_REFERENCE,
+                'nil?',
+                false,
+            ],
+            'shorthand suffix on a union is not unwrapped' => [
+                'string | nil?',
+                PropertyDefinition::TYPE_REFERENCE,
+                'string | nil?',
+                false,
+            ],
+            'a doubled shorthand suffix is not unwrapped' => [
+                'Owner??',
+                PropertyDefinition::TYPE_REFERENCE,
+                'Owner??',
+                false,
+            ],
             'an array without items is left intact rather than unwrapped' => [
                 'array | nil',
                 PropertyDefinition::TYPE_REFERENCE,
@@ -192,15 +211,29 @@ class PropertyDefinitionBuilderTest extends TestCase
         ];
     }
 
-    public function testNullableArrayWithScalarItemsIsUnwrapped()
+    /**
+     * @dataProvider dataProviderTestArrayItemsType
+     */
+    public function testArrayItemsType(string $declaredType, $items, bool $expectedNullable)
     {
         $property = $this->builder->buildPropertyDefinition(
             'tags',
-            ['type' => 'array | nil', 'items' => ['type' => 'string'], 'required' => true]
+            ['type' => $declaredType, 'items' => $items, 'required' => true]
         );
 
-        $this->assertSame(PropertyDefinition::TYPE_ARRAY, $property->getType());
-        $this->assertTrue($property->isNullable());
+        $this->assertInstanceOf(ArrayPropertyDefinition::class, $property);
+        $this->assertSame('string', $property->getItemsType());
+        $this->assertSame($expectedNullable, $property->isNullable());
+    }
+
+    public function dataProviderTestArrayItemsType()
+    {
+        return [
+            'items declared as a type map' => ['array', ['type' => 'string'], false],
+            'items declared as a shorthand' => ['array', 'string', false],
+            'nullable array with items declared as a type map' => ['array | nil', ['type' => 'string'], true],
+            'nullable array with items declared as a shorthand' => ['array | nil', 'string', true],
+        ];
     }
 
     public function testArrayWithoutItemsKeepsItsArrayDefinitionSoTheValidatorRejectsIt()
@@ -223,55 +256,60 @@ class PropertyDefinitionBuilderTest extends TestCase
         $this->assertFalse($property->isNullable());
     }
 
-    public function testNullableDateTimeKeepsItsOwnDefinitionType()
+    /**
+     * @dataProvider dataProviderTestNullableDateTimeKeepsItsOwnDefinitionType
+     */
+    public function testNullableDateTimeKeepsItsOwnDefinitionType(array $definition, string $expectedType)
     {
-        $property = $this->builder->buildPropertyDefinition(
-            'updated_at',
-            ['type' => 'datetime | nil', 'required' => true]
-        );
+        $property = $this->builder->buildPropertyDefinition('updated_at', $definition + ['required' => true]);
 
         $this->assertInstanceOf(DateTimePropertyDefinition::class, $property);
+        $this->assertSame($expectedType, $property->getType());
         $this->assertTrue($property->isNullable());
-        $this->assertFalse($property->isRequired());
+    }
+
+    public function dataProviderTestNullableDateTimeKeepsItsOwnDefinitionType()
+    {
+        return [
+            'nullable datetime' => [['type' => 'datetime | nil'], PropertyDefinition::TYPE_REFERENCE],
+            'nullable timestamp union' => [
+                ['type' => 'integer | nil', '(datetime_timestamp)' => null],
+                PropertyDefinition::TYPE_INTEGER,
+            ],
+            'nullable timestamp shorthand' => [
+                ['type' => 'integer?', '(datetime_timestamp)' => null],
+                PropertyDefinition::TYPE_INTEGER,
+            ],
+        ];
     }
 
     /**
-     * @dataProvider dataProviderTestRequiredMeansPresentAndNotNullable
+     * @dataProvider dataProviderTestRequiredIsPresenceAndNullabilityIsSeparate
      */
-    public function testRequiredMeansPresentAndNotNullable(
+    public function testRequiredIsPresenceAndNullabilityIsSeparate(
         string $declaredType,
         bool $required,
         bool $expectedNullable,
-        bool $expectedRequired
+        bool $expectedAcceptsNull
     ) {
         $property = $this->builder->buildPropertyDefinition(
             'value',
             ['type' => $declaredType, 'required' => $required]
         );
 
+        $this->assertSame($required, $property->isRequired());
         $this->assertSame($expectedNullable, $property->isNullable());
-        $this->assertSame($expectedRequired, $property->isRequired());
+        $this->assertSame($expectedAcceptsNull, $property->acceptsNull());
     }
 
-    public function dataProviderTestRequiredMeansPresentAndNotNullable()
+    public function dataProviderTestRequiredIsPresenceAndNullabilityIsSeparate()
     {
         return [
-            'present and not nullable' => ['boolean', true, false, true],
-            'present but nullable' => ['boolean | nil', true, true, false],
-            'absent and not nullable' => ['boolean', false, false, false],
-            'absent and nullable' => ['boolean | nil', false, true, false],
+            'present and not nullable' => ['boolean', true, false, false],
+            'present but nullable' => ['boolean | nil', true, true, true],
+            'present but nullable reference' => ['Owner | nil', true, true, true],
+            'absent and not nullable' => ['boolean', false, false, true],
+            'absent and nullable' => ['boolean | nil', false, true, true],
         ];
-    }
-
-    public function testUnwrappingKeepsTheReferenceAndMarksItNullable()
-    {
-        $property = $this->builder->buildPropertyDefinition(
-            'owner',
-            ['type' => 'Owner | nil', 'required' => true]
-        );
-
-        $this->assertSame('Owner', $property->getReference());
-        $this->assertTrue($property->isNullable());
-        $this->assertFalse($property->isRequired());
     }
 }

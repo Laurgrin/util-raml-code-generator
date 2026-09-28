@@ -208,20 +208,25 @@ provides no such column type — the host application has to register a custom D
 name for the mapping to load. That is pre-existing and unrelated to nullability, but it is why the
 nullable-type fixtures exercise `file` in the REST client only.
 
-An `array` is nullable only when its `items` are `integer`, `string` or `boolean`, and only in the
-REST client; in the Symfony bundle an array property remains a collection initialised to `[]`.
+An `array` is nullable only when its `items` are `integer`, `string` or `boolean`, declared either
+as `items: { type: string }` or with the shorthand `items: string`, and only in the REST client; in the Symfony bundle an array property remains a collection initialised to `[]`.
 Every other `items` type is rejected. For `datetime`, `file` and named types that is required
 for correctness, their generated getter mapping `null` to `[]`; for `number` it is conservative,
 the return-type template emitting `|null` only for the three types above. The JavaScript generator
 does not support nullable types and rejects a contract that declares one.
 
-Three spellings are equivalent, matching the RAML specification:
+Three spellings are equivalent:
 
 ```yaml
 type: boolean | nil
-type: boolean | null
 type: boolean?
+type: boolean | null
 ```
+
+`X | nil` and `X?` are the RAML 1.0 spellings, and RAML allows `?` only on scalars and named
+types. `X | null` is not standard RAML: `nil` is the only null type the specification defines, and
+`null` is accepted here only because the RAML parser this generator uses treats it as an alias.
+Other RAML tools may reject it, so prefer `nil`.
 
 Getters return `null`, and normalizers and Doctrine columns generated for the Symfony bundle treat
 the value as nullable.

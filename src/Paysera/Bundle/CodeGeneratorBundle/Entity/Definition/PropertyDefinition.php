@@ -180,7 +180,15 @@ class PropertyDefinition
      */
     public function isRequired()
     {
-        return $this->required && !$this->nullable;
+        return $this->required;
+    }
+
+    /**
+     * @return bool
+     */
+    public function acceptsNull()
+    {
+        return !$this->required || $this->nullable;
     }
 
     /**

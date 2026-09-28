@@ -1,4 +1,4 @@
-{% if property.required %}
+{% if not property.acceptsNull %}
 \DateTime
 {% else %}
 \DateTime|null

@@ -17,7 +17,7 @@
         <field name="archived" column="archived" nullable="true" type="boolean"/>
         <field name="score" column="score" nullable="true" type="integer"/>
         <field name="nickname" column="nickname" nullable="true" type="string"/>
-        <!--TODO: generated_code non-scalar property <field name="tags" column="tags" nullable="true" type="array"/>-->
+        <!--TODO: generated_code non-scalar property <field name="tags" column="tags" nullable="false" type="array"/>-->
         <field name="state" column="state" nullable="true" type="string"/>
         <field name="payload" column="payload" nullable="true" type="object"/>
         

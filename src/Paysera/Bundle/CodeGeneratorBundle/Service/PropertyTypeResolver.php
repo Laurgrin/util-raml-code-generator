@@ -1,0 +1,100 @@
+<?php
+declare(strict_types=1);
+
+namespace Paysera\Bundle\CodeGeneratorBundle\Service;
+
+use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\PropertyDefinition;
+
+class PropertyTypeResolver
+{
+    private const UNION_SEPARATOR = '|';
+    private const NULLABLE_UNION_MEMBERS = 2;
+    private const NULLABLE_SHORTHAND_SUFFIX = '?';
+    private const NULL_TYPE_NAMES = ['nil', 'null'];
+
+    public function resolveType(array $definition) : ?string
+    {
+        if (!isset($definition['type'])) {
+            return null;
+        }
+
+        return $this->resolveNullableType($definition) ?? $definition['type'];
+    }
+
+    public function resolveNullableType(array $definition) : ?string
+    {
+        if (!isset($definition['type'])) {
+            return null;
+        }
+
+        $unwrappedType = $this->unwrapNullableType($definition['type']);
+        if ($unwrappedType === null || !$this->isExpressibleType($unwrappedType, $definition)) {
+            return null;
+        }
+
+        return $unwrappedType;
+    }
+
+    public function getArrayItemsType(array $definition) : ?string
+    {
+        if (!isset($definition['items'])) {
+            return null;
+        }
+
+        if (is_string($definition['items'])) {
+            return $definition['items'];
+        }
+
+        return isset($definition['items']['type']) ? $definition['items']['type'] : null;
+    }
+
+    private function unwrapNullableType(string $type) : ?string
+    {
+        if (substr($type, -1) === self::NULLABLE_SHORTHAND_SUFFIX) {
+            return trim(substr($type, 0, -1));
+        }
+
+        if (strpos($type, self::UNION_SEPARATOR) === false) {
+            return null;
+        }
+
+        $members = array_map(
+            'trim',
+            explode(self::UNION_SEPARATOR, $type, self::NULLABLE_UNION_MEMBERS + 1)
+        );
+        if (count($members) !== self::NULLABLE_UNION_MEMBERS) {
+            return null;
+        }
+
+        $nilPositions = array_keys(array_filter($members, [$this, 'declaresNoValue']));
+        if (count($nilPositions) !== 1) {
+            return null;
+        }
+
+        return $members[$nilPositions[0] === 0 ? 1 : 0];
+    }
+
+    private function declaresNoValue(string $member) : bool
+    {
+        return in_array($member, self::NULL_TYPE_NAMES, true);
+    }
+
+    private function isExpressibleType(string $type, array $definition) : bool
+    {
+        if (
+            $type === ''
+            || $this->declaresNoValue($type)
+            || strpos($type, self::UNION_SEPARATOR) !== false
+            || substr($type, -1) === self::NULLABLE_SHORTHAND_SUFFIX
+            || strpos($type, '[]') !== false
+        ) {
+            return false;
+        }
+
+        if ($type === PropertyDefinition::TYPE_ARRAY) {
+            return in_array($this->getArrayItemsType($definition), PropertyDefinition::getScalarTypes(), true);
+        }
+
+        return true;
+    }
+}
