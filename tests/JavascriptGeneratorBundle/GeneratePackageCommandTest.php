@@ -96,7 +96,7 @@ class GeneratePackageCommandTest extends KernelTestCase
             ]);
             $this->fail('Expected the nullable contract to be rejected');
         } catch (UnrecognizedTypeException $exception) {
-            $this->assertSame('Did not found defined type "boolean | nil"', $exception->getMessage());
+            $this->assertSame('Did not found defined type "string | nil"', $exception->getMessage());
         }
 
         $this->assertFileDoesNotExist($generatedDir);
