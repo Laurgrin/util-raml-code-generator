@@ -5,7 +5,6 @@ namespace Paysera\Bundle\CodeGeneratorBundle\Service;
 
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\ArrayPropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\DateTimePropertyDefinition;
-use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\DateTimeTypeDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\FilePropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\PropertyDefinition;
 
@@ -22,20 +21,17 @@ class PropertyDefinitionBuilder
 
     public function buildPropertyDefinition(string $name, array $definition)
     {
-        $declaredType = isset($definition['type']) ? $definition['type'] : null;
-        $nullableType = $this->propertyTypeResolver->resolveNullableType($definition);
-        $nullable = $nullableType !== null;
-        $resolvedType = $nullable ? $nullableType : $declaredType;
+        $resolvedType = $this->propertyTypeResolver->resolveType($definition);
 
         $property = $this->getPropertyDefinition($resolvedType, $definition);
 
         $property
             ->setName($name)
             ->setType($resolvedType)
-            ->setDeclaredType($declaredType)
+            ->setDeclaredType(isset($definition['type']) ? $definition['type'] : null)
             ->setDescription(isset($definition['description']) ? $definition['description'] : null)
             ->setRequired(isset($definition['required']) ? $definition['required'] : false)
-            ->setNullable($nullable)
+            ->setNullable($this->propertyTypeResolver->isNullable($definition))
         ;
 
         if ($resolvedType !== null && strpos($resolvedType, '[]') !== false) {
@@ -72,14 +68,7 @@ class PropertyDefinitionBuilder
         if ($type === PropertyDefinition::TYPE_ARRAY) {
             $property = new ArrayPropertyDefinition();
             $property->setItemsType($this->propertyTypeResolver->getArrayItemsType($definition));
-        } elseif (
-            $type !== null
-            && in_array($type, DateTimeTypeDefinition::$supportedTypes, true)
-            || (
-                $type === PropertyDefinition::TYPE_INTEGER
-                && array_key_exists(DateTimeTypeDefinition::ANNOTATION_TIMESTAMP, $definition)
-            )
-        ) {
+        } elseif ($this->propertyTypeResolver->isDateTime($definition)) {
             $property = new DateTimePropertyDefinition();
             if (isset($definition['format'])) {
                 $property->setFormat($definition['format']);

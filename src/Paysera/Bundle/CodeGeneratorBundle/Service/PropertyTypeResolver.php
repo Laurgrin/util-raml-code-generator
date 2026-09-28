@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Paysera\Bundle\CodeGeneratorBundle\Service;
 
+use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\DateTimeTypeDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\PropertyDefinition;
 
 class PropertyTypeResolver
@@ -21,7 +22,24 @@ class PropertyTypeResolver
         return $this->resolveNullableType($definition) ?? $definition['type'];
     }
 
-    public function resolveNullableType(array $definition) : ?string
+    public function isNullable(array $definition) : bool
+    {
+        return $this->resolveNullableType($definition) !== null;
+    }
+
+    public function isDateTime(array $definition) : bool
+    {
+        $type = $this->resolveType($definition);
+
+        return in_array($type, DateTimeTypeDefinition::$supportedTypes, true)
+            || (
+                $type === PropertyDefinition::TYPE_INTEGER
+                && array_key_exists(DateTimeTypeDefinition::ANNOTATION_TIMESTAMP, $definition)
+            )
+        ;
+    }
+
+    private function resolveNullableType(array $definition) : ?string
     {
         if (!isset($definition['type'])) {
             return null;

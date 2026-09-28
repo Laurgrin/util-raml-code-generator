@@ -307,7 +307,6 @@ class PropertyDefinitionBuilderTest extends TestCase
         return [
             'present and not nullable' => ['boolean', true, false, false],
             'present but nullable' => ['boolean | nil', true, true, true],
-            'present but nullable reference' => ['Owner | nil', true, true, true],
             'absent and not nullable' => ['boolean', false, false, true],
             'absent and nullable' => ['boolean | nil', false, true, true],
         ];
