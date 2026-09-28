@@ -41,7 +41,10 @@ class ResultTypeBuilder implements TypeDefinitionBuilderInterface
         $dataKey = null;
         if (count($possibleKeys) > 0) {
             $dataKey = $possibleKeys[0];
-            $itemsType = $this->propertyTypeResolver->getArrayItemsType($definition['properties'][$dataKey]);
+            $dataProperty = $definition['properties'][$dataKey];
+            if (is_array($dataProperty)) {
+                $itemsType = $this->propertyTypeResolver->getArrayItemsType($dataProperty);
+            }
         }
 
         $type

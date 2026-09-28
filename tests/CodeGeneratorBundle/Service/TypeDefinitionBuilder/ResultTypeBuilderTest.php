@@ -12,7 +12,7 @@ class ResultTypeBuilderTest extends TestCase
     /**
      * @dataProvider dataProviderTestItemsType
      */
-    public function testItemsType(array $dataProperty, ?string $expectedItemsType)
+    public function testItemsType($dataProperty, ?string $expectedItemsType)
     {
         $builder = new ResultTypeBuilder(new PropertyTypeResolver());
 
@@ -31,6 +31,7 @@ class ResultTypeBuilderTest extends TestCase
             'items declared as a type map' => [['type' => 'array', 'items' => ['type' => 'Item']], 'Item'],
             'items declared as a shorthand' => [['type' => 'array', 'items' => 'Item'], 'Item'],
             'no items declared' => [['type' => 'array'], null],
+            'data property declared with the shorthand form' => ['Item[]', null],
         ];
     }
 }

@@ -23,7 +23,7 @@ class DateTimeTypeBuilder implements TypeDefinitionBuilderInterface
             $fields = $definition['queryParameters'];
         }
         foreach ($fields as $field) {
-            if ($this->propertyTypeResolver->isDateTime($field)) {
+            if (is_array($field) && $this->propertyTypeResolver->isDateTime($field)) {
                 return true;
             }
         }
