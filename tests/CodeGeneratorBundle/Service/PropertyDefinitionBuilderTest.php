@@ -6,6 +6,7 @@ namespace Tests\CodeGeneratorBundle\Service;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\ArrayPropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\DateTimePropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\PropertyDefinition;
+use Paysera\Bundle\CodeGeneratorBundle\Exception\InvalidDefinitionException;
 use Paysera\Bundle\CodeGeneratorBundle\Service\ConstantBuilder;
 use Paysera\Bundle\CodeGeneratorBundle\Service\PropertyDefinitionBuilder;
 use Paysera\Bundle\CodeGeneratorBundle\Service\PropertyTypeResolver;
@@ -266,6 +267,17 @@ class PropertyDefinitionBuilderTest extends TestCase
 
         $this->assertCount(1, $property->getConstants());
         $this->assertSame('active', $property->getConstants()[0]->getValue());
+    }
+
+    public function testNullMemberOfNonNullableEnumIsRejected()
+    {
+        $this->expectException(InvalidDefinitionException::class);
+        $this->expectExceptionMessage('Enum of property "state" lists null, but its type "string" is not nullable');
+
+        $this->builder->buildPropertyDefinition(
+            'state',
+            ['type' => 'string', 'enum' => ['active', null], 'required' => true]
+        );
     }
 
     /**

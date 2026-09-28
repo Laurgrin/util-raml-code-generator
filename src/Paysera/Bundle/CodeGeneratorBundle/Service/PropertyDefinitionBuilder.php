@@ -7,6 +7,7 @@ use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\ArrayPropertyDefinition
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\DateTimePropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\FilePropertyDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\PropertyDefinition;
+use Paysera\Bundle\CodeGeneratorBundle\Exception\InvalidDefinitionException;
 
 class PropertyDefinitionBuilder
 {
@@ -55,13 +56,31 @@ class PropertyDefinitionBuilder
         }
 
         if (isset($definition['enum'])) {
-            $enumValues = array_values(array_filter($definition['enum'], function ($value) {
-                return $value !== null;
-            }));
-            $property->setConstants($this->constantBuilder->build($name, $enumValues));
+            $property->setConstants(
+                $this->constantBuilder->build($name, $this->getEnumConstantValues($property, $definition['enum']))
+            );
         }
 
         return $property;
+    }
+
+    private function getEnumConstantValues(PropertyDefinition $property, array $enum) : array
+    {
+        if (!in_array(null, $enum, true)) {
+            return $enum;
+        }
+
+        if (!$property->isNullable()) {
+            throw new InvalidDefinitionException(sprintf(
+                'Enum of property "%s" lists null, but its type "%s" is not nullable',
+                $property->getName(),
+                $property->getDeclaredType()
+            ));
+        }
+
+        return array_values(array_filter($enum, function ($value) {
+            return $value !== null;
+        }));
     }
 
     private function getPropertyDefinition(?string $type, array $definition) : PropertyDefinition
