@@ -31,12 +31,13 @@ class PropertyTypeResolver
     {
         $type = $this->resolveType($definition);
 
-        return in_array($type, DateTimeTypeDefinition::$supportedTypes, true)
+        return (
+            in_array($type, DateTimeTypeDefinition::$supportedTypes, true)
             || (
                 $type === PropertyDefinition::TYPE_INTEGER
                 && array_key_exists(DateTimeTypeDefinition::ANNOTATION_TIMESTAMP, $definition)
             )
-        ;
+        );
     }
 
     private function resolveNullableType(array $definition) : ?string
