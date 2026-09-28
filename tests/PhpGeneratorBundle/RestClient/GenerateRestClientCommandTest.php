@@ -91,7 +91,10 @@ class GenerateRestClientCommandTest extends KernelTestCase
             ]);
             $this->fail('Expected the items-less array to be rejected');
         } catch (UnrecognizedTypeException $exception) {
-            $this->assertSame('Array property "contents" of type "Container" has no items type', $exception->getMessage());
+            $this->assertSame(
+                'Array property "contents" of type "Container" has no items type',
+                $exception->getMessage()
+            );
         }
 
         $this->assertFileDoesNotExist($generatedDir);
