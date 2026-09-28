@@ -85,7 +85,7 @@ class PropertyTypeResolver
             return null;
         }
 
-        $nilPositions = array_keys(array_filter($members, [$this, 'declaresNoValue']));
+        $nilPositions = array_keys(array_filter($members, [$this, 'isNullTypeName']));
         if (count($nilPositions) !== 1) {
             return null;
         }
@@ -93,7 +93,7 @@ class PropertyTypeResolver
         return $members[$nilPositions[0] === 0 ? 1 : 0];
     }
 
-    private function declaresNoValue(string $member) : bool
+    private function isNullTypeName(string $member) : bool
     {
         return in_array($member, self::NULL_TYPE_NAMES, true);
     }
@@ -102,7 +102,7 @@ class PropertyTypeResolver
     {
         if (
             $type === ''
-            || $this->declaresNoValue($type)
+            || $this->isNullTypeName($type)
             || strpos($type, self::UNION_SEPARATOR) !== false
             || substr($type, -1) === self::NULLABLE_SHORTHAND_SUFFIX
             || strpos($type, '[]') !== false

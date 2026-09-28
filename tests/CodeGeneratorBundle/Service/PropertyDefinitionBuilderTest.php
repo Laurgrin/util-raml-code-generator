@@ -257,6 +257,17 @@ class PropertyDefinitionBuilderTest extends TestCase
         $this->assertFalse($property->isNullable());
     }
 
+    public function testNullMemberOfNullableEnumIsNotAConstant()
+    {
+        $property = $this->builder->buildPropertyDefinition(
+            'state',
+            ['type' => 'string | nil', 'enum' => ['active', null], 'required' => true]
+        );
+
+        $this->assertCount(1, $property->getConstants());
+        $this->assertSame('active', $property->getConstants()[0]->getValue());
+    }
+
     /**
      * @dataProvider dataProviderTestNullableDateTimeKeepsItsOwnDefinitionType
      */

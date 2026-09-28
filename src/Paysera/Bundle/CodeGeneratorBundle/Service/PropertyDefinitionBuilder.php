@@ -55,7 +55,10 @@ class PropertyDefinitionBuilder
         }
 
         if (isset($definition['enum'])) {
-            $property->setConstants($this->constantBuilder->build($name, $definition['enum']));
+            $enumValues = array_values(array_filter($definition['enum'], function ($value) {
+                return $value !== null;
+            }));
+            $property->setConstants($this->constantBuilder->build($name, $enumValues));
         }
 
         return $property;
