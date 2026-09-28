@@ -78,14 +78,12 @@ class EntityGenerator implements GeneratorInterface
         return $items;
     }
 
-    private function rejectNullableProperties(TypeDefinition $type)
+    private function rejectNullableProperties(TypeDefinition $type) : void
     {
         foreach ($type->getProperties() as $property) {
-            if (!$property->isNullable()) {
-                continue;
+            if ($property->isNullable()) {
+                throw UnrecognizedTypeException::undefinedType($property->getDeclaredType());
             }
-
-            throw UnrecognizedTypeException::undefinedType($property->getDeclaredType());
         }
     }
 
