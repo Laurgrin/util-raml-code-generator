@@ -69,19 +69,6 @@ class PropertyTypeResolver
         return $unwrappedType;
     }
 
-    public function getArrayItemsType(array $definition) : ?string
-    {
-        if (!isset($definition['items'])) {
-            return null;
-        }
-
-        if (is_string($definition['items'])) {
-            return $definition['items'];
-        }
-
-        return isset($definition['items']['type']) ? $definition['items']['type'] : null;
-    }
-
     private function unwrapNullableType(string $type) : ?string
     {
         if (substr($type, -1) === self::NULLABLE_SHORTHAND_SUFFIX) {
@@ -126,7 +113,7 @@ class PropertyTypeResolver
         }
 
         if ($type === PropertyDefinition::TYPE_ARRAY) {
-            return in_array($this->getArrayItemsType($definition), PropertyDefinition::getScalarTypes(), true);
+            return in_array($definition['items']['type'] ?? null, PropertyDefinition::getScalarTypes(), true);
         }
 
         return true;

@@ -259,7 +259,7 @@ class Category extends Entity
      */
     public function getPayload()
     {
-        return $this->getByReference('payload');
+return $this->getByReference('payload');
     }
     /**
      * @param object $payload

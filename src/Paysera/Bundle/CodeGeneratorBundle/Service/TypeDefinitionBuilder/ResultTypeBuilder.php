@@ -5,18 +5,10 @@ namespace Paysera\Bundle\CodeGeneratorBundle\Service\TypeDefinitionBuilder;
 
 use Paysera\Bundle\CodeGeneratorBundle\Entity\Definition\ResultTypeDefinition;
 use Paysera\Bundle\CodeGeneratorBundle\Exception\InvalidDefinitionException;
-use Paysera\Bundle\CodeGeneratorBundle\Service\PropertyTypeResolver;
 
 class ResultTypeBuilder implements TypeDefinitionBuilderInterface
 {
     const ANNOTATION_ENTITY = '(entity_type)';
-
-    private $propertyTypeResolver;
-
-    public function __construct(PropertyTypeResolver $propertyTypeResolver)
-    {
-        $this->propertyTypeResolver = $propertyTypeResolver;
-    }
 
     public function supports(string $name, array $definition): bool
     {
@@ -41,9 +33,8 @@ class ResultTypeBuilder implements TypeDefinitionBuilderInterface
         $dataKey = null;
         if (count($possibleKeys) > 0) {
             $dataKey = $possibleKeys[0];
-            $dataProperty = $definition['properties'][$dataKey];
-            if (is_array($dataProperty)) {
-                $itemsType = $this->propertyTypeResolver->getArrayItemsType($dataProperty);
+            if (isset($definition['properties'][$dataKey]['items'])) {
+                $itemsType = $definition['properties'][$dataKey]['items']['type'];
             }
         }
 

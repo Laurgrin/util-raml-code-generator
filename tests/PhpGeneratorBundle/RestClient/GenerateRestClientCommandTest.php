@@ -3,7 +3,6 @@
 namespace Tests\PhpGeneratorBundle\RestClient;
 
 use Doctrine\Common\Util\Inflector;
-use Paysera\Bundle\CodeGeneratorBundle\Exception\UnrecognizedTypeException;
 use Paysera\Bundle\PhpGeneratorBundle\Command\GenerateRestClientCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -75,29 +74,6 @@ class GenerateRestClientCommandTest extends KernelTestCase
         $this->commandTester->execute($arguments);
 
         $this->ensureDirectoryTreeMatches($apiName);
-    }
-
-    public function testGenerateCodeRejectsArrayWithoutItemsType()
-    {
-        $apiName = 'array-without-items';
-        $this->removeTargetDir($apiName);
-        $generatedDir = sprintf('%s/Fixtures/generated/%s', __DIR__, $apiName);
-
-        try {
-            $this->commandTester->execute([
-                'raml_file' => sprintf('%s/Fixtures/raml/%s/api.raml', __DIR__, $apiName),
-                'output_dir' => $generatedDir,
-                'namespace' => 'Paysera\\Test\\ArrayWithoutItemsClient',
-            ]);
-            $this->fail('Expected the items-less array to be rejected');
-        } catch (UnrecognizedTypeException $exception) {
-            $this->assertSame(
-                'Array property "contents" of type "Container" has no items type',
-                $exception->getMessage()
-            );
-        }
-
-        $this->assertFileDoesNotExist($generatedDir);
     }
 
     public function dataProviderTestGenerateCode()

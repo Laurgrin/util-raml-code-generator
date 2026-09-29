@@ -207,9 +207,8 @@ generators. For `file` the Symfony bundle additionally emits `<field type="file"
 provides no such column type — the host application has to register a custom DBAL type under that
 name for the mapping to load.
 
-An `array` is nullable only when its `items` are `integer`, `string` or `boolean`, declared either
-as `items: { type: string }` or with the shorthand `items: string`, and only in the REST client;
-in the Symfony bundle an array property remains a collection initialised to `[]`.
+An `array` is nullable only when its `items` are `integer`, `string` or `boolean`, and only in the
+REST client; in the Symfony bundle an array property remains a collection initialised to `[]`.
 Every other `items` type is rejected. For `datetime`, `file` and named types that is required
 for correctness, their generated getter mapping `null` to `[]`; for `number` it is conservative,
 the return-type template emitting `|null` only for the three types above. The JavaScript generator

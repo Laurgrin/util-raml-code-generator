@@ -84,13 +84,15 @@ class PropertyDefinitionBuilder
         }));
     }
 
-    private function getPropertyDefinition(?string $type, array $definition) : PropertyDefinition
+    private function getPropertyDefinition(?string $type, array $definition)
     {
         $property = new PropertyDefinition();
 
         if ($type === PropertyDefinition::TYPE_ARRAY) {
             $property = new ArrayPropertyDefinition();
-            $property->setItemsType($this->propertyTypeResolver->getArrayItemsType($definition));
+            $property
+                ->setItemsType($definition['items']['type'])
+            ;
         } elseif ($this->propertyTypeResolver->isDateTime($definition)) {
             $property = new DateTimePropertyDefinition();
             if (isset($definition['format'])) {

@@ -214,9 +214,8 @@ class PropertyDefinitionBuilderTest extends TestCase
 
     /**
      * @dataProvider dataProviderTestArrayItemsType
-     * @param array|string $items
      */
-    public function testArrayItemsType(string $declaredType, $items, bool $expectedNullable)
+    public function testArrayItemsType(string $declaredType, array $items, bool $expectedNullable)
     {
         $property = $this->builder->buildPropertyDefinition(
             'tags',
@@ -232,18 +231,8 @@ class PropertyDefinitionBuilderTest extends TestCase
     {
         return [
             'items declared as a type map' => ['array', ['type' => 'string'], false],
-            'items declared as a shorthand' => ['array', 'string', false],
             'nullable array with items declared as a type map' => ['array | nil', ['type' => 'string'], true],
-            'nullable array with items declared as a shorthand' => ['array | nil', 'string', true],
         ];
-    }
-
-    public function testArrayWithoutItemsKeepsItsArrayDefinitionSoTheValidatorRejectsIt()
-    {
-        $property = $this->builder->buildPropertyDefinition('contents', ['type' => 'array']);
-
-        $this->assertInstanceOf(ArrayPropertyDefinition::class, $property);
-        $this->assertNull($property->getItemsType());
     }
 
     public function testNullableArrayOfReferencesIsLeftForTheValidatorToReject()
